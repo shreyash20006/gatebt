@@ -19,6 +19,9 @@ export interface Subject {
   gate_weightage: string | null;
   sort_order: number;
   pdf_path?: string | null;
+  mindmap_path?: string | null;
+  tagline?: string | null;
+  notes_md?: string | null;
   category?: Category;
   resources_count?: number;
 }
