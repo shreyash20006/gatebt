@@ -3,26 +3,54 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, LucideIcon } from 'lucide-react';
+import {
+  ArrowRight,
+  Dna,
+  Pill,
+  FileQuestion,
+  BookOpen,
+  GraduationCap,
+  BadgeCheck,
+} from 'lucide-react';
+
+export type CategoryIconType = 'dna' | 'pill' | 'pyq' | 'resource' | 'paper' | 'saved';
 
 interface CategoryCardProps {
   title: string;
   emoji?: string;
-  icon: LucideIcon;
+  iconType: CategoryIconType;
   description: string;
   itemCount?: string;
   href: string;
-  accentColor?: string;
 }
 
 export default function CategoryCard({
   title,
   emoji,
-  icon: Icon,
+  iconType,
   description,
   itemCount,
   href,
 }: CategoryCardProps) {
+  const renderIcon = () => {
+    switch (iconType) {
+      case 'dna':
+        return <Dna className="w-5 h-5" />;
+      case 'pill':
+        return <Pill className="w-5 h-5" />;
+      case 'pyq':
+        return <FileQuestion className="w-5 h-5 text-amber-500" />;
+      case 'resource':
+        return <BookOpen className="w-5 h-5 text-emerald-500" />;
+      case 'paper':
+        return <GraduationCap className="w-5 h-5 text-[#0B2A63]" />;
+      case 'saved':
+        return <BadgeCheck className="w-5 h-5 text-[#1CA3DC]" />;
+      default:
+        return <BookOpen className="w-5 h-5" />;
+    }
+  };
+
   return (
     <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }}>
       <Link
@@ -32,7 +60,7 @@ export default function CategoryCard({
         <div>
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#0B2A63]/5 text-[#0B2A63] flex items-center justify-center group-hover:bg-[#0B2A63] group-hover:text-white transition-colors">
-              <Icon className="w-5 h-5" />
+              {renderIcon()}
             </div>
             {itemCount && (
               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">

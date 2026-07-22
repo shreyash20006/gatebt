@@ -75,7 +75,7 @@ export default async function HomePage() {
           <CategoryCard
             title="GATE Biotechnology"
             emoji="🧬"
-            icon={Dna}
+            iconType="dna"
             description="17 Core subjects including Biochemistry, Bioprocess, rDNA Tech, & Molecular Biology."
             itemCount="17 Subjects"
             href="/category/gate-biotechnology"
@@ -84,7 +84,7 @@ export default async function HomePage() {
           <CategoryCard
             title="B.Pharmacy — DBATU"
             emoji="💊"
-            icon={Pill}
+            iconType="pill"
             description="Pharmaceutical Chemistry, Medicinal Chemistry, Pharmacognosy, & Biotech."
             itemCount="9 Subjects"
             href="/category/b-pharmacy-dbatu"
@@ -93,7 +93,7 @@ export default async function HomePage() {
           <CategoryCard
             title="Previous Year Questions"
             emoji="📝"
-            icon={FileQuestion}
+            iconType="pyq"
             description="340+ Solved GATE questions (2019-2024) with instant answer key reveals."
             itemCount="349 PYQs"
             href="/pyq"
@@ -102,7 +102,7 @@ export default async function HomePage() {
           <CategoryCard
             title="Resource Library"
             emoji="📚"
-            icon={BookOpen}
+            iconType="resource"
             description="Curated textbooks, NPTEL videos, NCBI manuals, and website links."
             itemCount="22 Resources"
             href="/resources"
@@ -111,7 +111,7 @@ export default async function HomePage() {
           <CategoryCard
             title="All GATE Papers"
             emoji="🎓"
-            icon={GraduationCap}
+            iconType="paper"
             description="Official syllabus PDFs, YouTube video playlists, & resources for all 29 papers."
             itemCount="29 Papers"
             href="/papers"
@@ -120,7 +120,7 @@ export default async function HomePage() {
           <CategoryCard
             title="Saved Store Library"
             emoji="❤️"
-            icon={BadgeCheck}
+            iconType="saved"
             description="Access all your bookmarked study notes, PYQs, and mind maps in one place."
             itemCount="Personalized"
             href="/saved"
