@@ -118,7 +118,7 @@ export default function DownloadsPage() {
       {/* 3. 3D Tilt Download Cards Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredSubjects.map((s, i) => {
-          const resPair = resourcesBySubject.get(s.id);
+          const resPair = resourcesBySubject.get(String(s.id));
           const pdfPath = s.pdf_path || resPair?.notes?.file_path || `notes/${s.slug}.pdf`;
           const mindmapPath = s.mindmap_path || resPair?.mindmap?.file_path;
 
@@ -164,7 +164,7 @@ export default function DownloadsPage() {
                         <FileText size={14} className="text-brand-azure" /> Notes PDF
                       </span>
                       <DirectDownloadButton
-                        resourceId={resPair?.notes?.id || s.id}
+                        resourceId={String(resPair?.notes?.id || s.id)}
                         filePath={pdfPath}
                         title={`${s.name} Notes`}
                         label="Download"
@@ -178,7 +178,7 @@ export default function DownloadsPage() {
                           <Brain size={14} className="text-purple-600" /> Mind Map
                         </span>
                         <DirectDownloadButton
-                          resourceId={resPair?.mindmap?.id || `${s.id}-mindmap`}
+                          resourceId={String(resPair?.mindmap?.id || `${s.id}-mindmap`)}
                           filePath={mindmapPath}
                           title={`${s.name} Mind Map`}
                           label="Download"

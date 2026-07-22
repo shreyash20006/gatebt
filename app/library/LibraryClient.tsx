@@ -50,10 +50,10 @@ export default function LibraryClient({
       items.push({
         id: `note-${s.id}`,
         title: `${s.name} — Complete Study Notes`,
-        description: s.description,
+        description: s.description || undefined,
         category: s.category?.name || 'GATE Biotechnology',
         resourceType: 'note',
-        icon: s.icon,
+        icon: s.icon || undefined,
         href: `/subject/${s.slug}`,
         downloadUrl: s.pdf_path || undefined,
         code: s.subject_code || undefined,

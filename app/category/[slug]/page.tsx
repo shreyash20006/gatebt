@@ -24,7 +24,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const subjects = await getSubjects(category.id);
+  const subjects = await getSubjects(String(category.id));
   const resources = await getResources();
 
   const featuredMap = new Map();

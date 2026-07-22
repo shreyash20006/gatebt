@@ -38,6 +38,7 @@ export type Resource = {
   rating: number | null;
   subject_id?: string;
   is_featured?: boolean;
+  file_path?: string;
 };
 
 export interface ResourceItem {
@@ -66,3 +67,12 @@ export type Subject = {
   category_id?: string;
   category?: { id: number; slug: string; name: string } | null;
 };
+
+export interface Category {
+  id: number | string;
+  slug: string;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
