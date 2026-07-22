@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Logo from './Logo';
-import { Mail, Send, Award, Heart } from 'lucide-react';
+import { Mail, Send, Award, Heart, Instagram } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -33,8 +33,15 @@ export default function Footer() {
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <Send className="w-4 h-4 text-brand-azure" />
-                <span className="font-semibold text-white">@gatebt_prep</span>
+                <Instagram className="w-4 h-4 text-pink-400" />
+                <a
+                  href="https://www.instagram.com/gatebt_prep/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white hover:text-brand-azure transition-colors"
+                >
+                  @gatebt_prep
+                </a>
               </li>
               <li className="flex items-center gap-2 pt-1 text-slate-300 font-medium">
                 <Award className="w-4 h-4 text-brand-gold" />

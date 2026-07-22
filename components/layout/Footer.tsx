@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Send, Award, Heart, Youtube, ExternalLink } from 'lucide-react';
+import { Mail, Send, Award, Heart, Youtube, ExternalLink, Instagram } from 'lucide-react';
 
 const OFFICIAL_LOGO_URL = 'https://res.cloudinary.com/dsqxboxoc/image/upload/v1784742553/file_000000006ac482079fec338c6f263639_vebrw3.png';
 
@@ -101,8 +101,16 @@ export default function Footer() {
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <Send className="w-4 h-4 text-[#1CA3DC]" />
-                <span className="font-semibold text-white">@gatebt_prep</span>
+                <Instagram className="w-4 h-4 text-pink-400" />
+                <a
+                  href="https://www.instagram.com/gatebt_prep/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white hover:text-[#1CA3DC] transition-colors inline-flex items-center gap-1"
+                >
+                  <span>@gatebt_prep</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Youtube className="w-4 h-4 text-red-500" />

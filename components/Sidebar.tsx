@@ -237,7 +237,14 @@ export default function Sidebar({
 
       {/* Sidebar Footer Badge */}
       <div className="p-3 border-t border-brand-border bg-slate-50 text-[11px] text-slate-500 flex items-center justify-between">
-        <span className="font-semibold text-brand-navy">@gatebt_prep</span>
+        <a
+          href="https://www.instagram.com/gatebt_prep/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-brand-navy hover:text-brand-azure transition-colors"
+        >
+          @gatebt_prep
+        </a>
         <span className="px-2 py-0.5 rounded-md bg-brand-gold-light text-amber-800 text-[10px] font-bold">
           IIT Prep 🚀
         </span>
