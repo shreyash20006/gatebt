@@ -7,7 +7,7 @@ import { Category, Subject, Resource } from '@/lib/types';
 import SearchBar from './SearchBar';
 import DirectDownloadButton from './DirectDownloadButton';
 import { RevealCard } from './RevealCard';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, Sparkles, Award } from 'lucide-react';
 
 interface HomeClientProps {
   categories: Category[];
@@ -18,7 +18,6 @@ interface HomeClientProps {
 export default function HomeClient({ categories, subjects, resources }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Map resources for fast lookup of featured notes per subject
   const featuredResourcesMap = new Map<string, Resource>();
   resources.forEach(r => {
     if (!featuredResourcesMap.has(r.subject_id) || r.is_featured) {
@@ -26,7 +25,6 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
     }
   });
 
-  // Filter subjects by search query
   const filteredSubjects = subjects.filter(subject => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
@@ -36,61 +34,58 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
     return nameMatch || codeMatch || descMatch;
   });
 
-  const headerVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Notion Page Header with Staggered Entrance */}
-      <motion.header
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: { opacity: 0 },
-          show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-        }}
-        className="space-y-3 pb-4 border-b border-notion-divider"
+    <div className="space-y-10">
+      {/* Hero Banner (PW Style Navy -> Azure) */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="rounded-3xl bg-gradient-to-r from-brand-navy via-[#0D3880] to-brand-azure p-8 sm:p-12 text-white shadow-pw relative overflow-hidden"
       >
-        <motion.div variants={headerVariants} className="flex items-center gap-2">
-          <span className="text-3xl">🧬</span>
-          <h1 className="text-3xl font-extrabold text-notion-text tracking-tight">
-            GateBT Prep
+        <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-brand-azure/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-10 -left-10 w-60 h-60 bg-brand-gold/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-3xl space-y-5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-gold text-brand-navy text-xs font-extrabold shadow-sm">
+            <Sparkles className="w-3.5 h-3.5" /> 100% Free Direct Downloads · No Login Required
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-white">
+            GateBT Prep <span className="text-brand-gold">— Your Notes. Your Success.</span>
           </h1>
-        </motion.div>
 
-        <motion.p variants={headerVariants} className="text-sm text-notion-muted max-w-2xl leading-relaxed">
-          Open study notes repository for GATE Biotechnology & B.Pharmacy DBATU. Direct PDF download, no login required.
-        </motion.p>
+          <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-2xl">
+            High-yield handwritten notes, solved question banks, mind maps, and past paper hubs for <strong className="text-white">GATE Biotechnology</strong> and <strong className="text-white">B.Pharmacy DBATU</strong>.
+          </p>
 
-        {/* Search Bar */}
-        <motion.div variants={headerVariants} className="pt-2">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        </motion.div>
-      </motion.header>
+          <div className="pt-2">
+            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          </div>
+        </div>
+      </motion.section>
 
-      {/* Search Results View or Category List Views */}
+      {/* Main Subjects / Categories Grid */}
       {searchQuery ? (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-notion-muted">
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-brand-navy">
               Search Results ({filteredSubjects.length})
             </h2>
             <button
               onClick={() => setSearchQuery('')}
-              className="text-xs text-notion-blue hover:underline font-medium"
+              className="text-xs text-brand-azure hover:underline font-bold"
             >
               Clear Filter
             </button>
           </div>
 
           {filteredSubjects.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-notion-divider rounded-md text-notion-muted text-sm">
+            <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-500 text-sm">
               No subjects found matching &quot;{searchQuery}&quot;.
             </div>
           ) : (
-            <div className="border border-notion-divider rounded-md divide-y divide-notion-divider bg-white">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredSubjects.map((subject, idx) => {
                 const targetRes = featuredResourcesMap.get(subject.id);
                 const filePath = subject.pdf_path || targetRes?.file_path || `notes/${subject.slug}.pdf`;
@@ -98,46 +93,47 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
 
                 return (
                   <RevealCard key={subject.id} index={idx}>
-                    <div className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-notion-hover/60 transition-all hover:-translate-y-0.5">
-                      <div className="flex items-start sm:items-center gap-3 min-w-0">
-                        <span className="text-xl shrink-0 mt-0.5 sm:mt-0">{subject.icon || '📚'}</span>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Link
-                              href={`/subject/${subject.slug}`}
-                              className="font-medium text-sm text-notion-text hover:text-notion-blue transition-colors truncate"
-                            >
-                              {subject.name}
-                            </Link>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:shadow-pw-hover transition-all flex flex-col justify-between h-full">
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <span className="text-2xl">{subject.icon || '📚'}</span>
+                          <div className="flex items-center gap-1.5 flex-wrap justify-end">
                             {subject.subject_code && (
-                              <span className="px-1.5 py-0.5 rounded bg-notion-tag text-[10px] font-mono text-notion-muted border border-notion-divider">
+                              <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-brand-navy text-[11px] font-mono font-bold">
                                 {subject.subject_code}
                               </span>
                             )}
                             {subject.gate_weightage && (
-                              <span className="text-[11px] text-emerald-700 font-medium hidden sm:inline">
-                                • {subject.gate_weightage}
+                              <span className="px-2 py-0.5 rounded-full bg-brand-gold-light text-amber-900 text-[10px] font-extrabold">
+                                {subject.gate_weightage}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-notion-muted line-clamp-1 mt-0.5">
-                            {subject.description}
-                          </p>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                         <Link
                           href={`/subject/${subject.slug}`}
-                          className="text-xs text-notion-muted hover:text-notion-text px-2 py-1 hover:bg-notion-hover rounded transition-colors"
+                          className="font-extrabold text-base text-brand-navy hover:text-brand-azure transition-colors block mb-1.5"
                         >
-                          View resources
+                          {subject.name}
+                        </Link>
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                          {subject.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <Link
+                          href={`/subject/${subject.slug}`}
+                          className="text-xs font-bold text-slate-500 hover:text-brand-navy"
+                        >
+                          View Details
                         </Link>
                         <DirectDownloadButton
                           resourceId={resId}
                           filePath={filePath}
                           title={`${subject.name} Notes`}
-                          label="Download PDF"
+                          label="Download"
                           compact
                         />
                       </div>
@@ -149,35 +145,32 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
           )}
         </section>
       ) : (
-        /* Categories Notion-Database-List Sections */
-        <div className="space-y-10">
+        <div className="space-y-12">
           {categories.map((category, catIdx) => {
             const catSubjects = subjects.filter(s => s.category_id === category.id);
             return (
               <RevealCard key={category.id} index={catIdx}>
-                <section className="space-y-3">
-                  {/* Category Header Row */}
-                  <div className="flex items-center justify-between pb-1 border-b border-notion-divider">
+                <section className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{category.icon}</span>
-                      <h2 className="text-base font-bold text-notion-text">
+                      <span className="text-2xl">{category.icon}</span>
+                      <h2 className="text-xl font-extrabold text-brand-navy">
                         {category.name}
                       </h2>
-                      <span className="text-xs text-notion-muted font-normal">
-                        ({catSubjects.length})
+                      <span className="text-xs text-slate-500 font-semibold">
+                        ({catSubjects.length} subjects)
                       </span>
                     </div>
                     <Link
                       href={`/category/${category.slug}`}
-                      className="text-xs font-medium text-notion-blue hover:underline flex items-center gap-1"
+                      className="text-xs font-bold text-brand-azure hover:underline flex items-center gap-1"
                     >
-                      <span>View category page</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <span>View All</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
 
-                  {/* Notion Database List Row View */}
-                  <div className="border border-notion-divider rounded-md divide-y divide-notion-divider bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {catSubjects.map((subject, subIdx) => {
                       const targetRes = featuredResourcesMap.get(subject.id);
                       const filePath = subject.pdf_path || targetRes?.file_path || `notes/${subject.slug}.pdf`;
@@ -186,41 +179,42 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
                       return (
                         <div
                           key={subject.id}
-                          className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-notion-hover/60 transition-all hover:-translate-y-0.5"
+                          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:shadow-pw-hover transition-all flex flex-col justify-between h-full"
                         >
-                          <div className="flex items-start sm:items-center gap-3 min-w-0">
-                            <span className="text-lg shrink-0 mt-0.5 sm:mt-0">{subject.icon || '📚'}</span>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <Link
-                                  href={`/subject/${subject.slug}`}
-                                  className="font-medium text-sm text-notion-text hover:text-notion-blue transition-colors truncate"
-                                >
-                                  {subject.name}
-                                </Link>
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-3">
+                              <span className="text-2xl">{subject.icon || '📚'}</span>
+                              <div className="flex items-center gap-1.5 flex-wrap justify-end">
                                 {subject.subject_code && (
-                                  <span className="px-1.5 py-0.5 rounded bg-notion-tag text-[10px] font-mono text-notion-muted border border-notion-divider">
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 text-brand-navy text-[11px] font-mono font-bold">
                                     {subject.subject_code}
                                   </span>
                                 )}
                                 {subject.gate_weightage && (
-                                  <span className="text-[11px] text-emerald-700 font-medium">
-                                    • {subject.gate_weightage}
+                                  <span className="px-2 py-0.5 rounded-full bg-brand-gold-light text-amber-900 text-[10px] font-extrabold">
+                                    {subject.gate_weightage}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-notion-muted line-clamp-1 mt-0.5">
-                                {subject.description}
-                              </p>
                             </div>
-                          </div>
 
-                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                             <Link
                               href={`/subject/${subject.slug}`}
-                              className="text-xs text-notion-muted hover:text-notion-text px-2 py-1 hover:bg-notion-hover rounded transition-colors"
+                              className="font-extrabold text-base text-brand-navy hover:text-brand-azure transition-colors block mb-1.5"
                             >
-                              View
+                              {subject.name}
+                            </Link>
+                            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                              {subject.description}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <Link
+                              href={`/subject/${subject.slug}`}
+                              className="text-xs font-bold text-slate-500 hover:text-brand-navy"
+                            >
+                              View Notes
                             </Link>
                             <DirectDownloadButton
                               resourceId={resId}

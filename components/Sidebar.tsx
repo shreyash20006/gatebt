@@ -4,16 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Category, Subject } from '@/lib/types';
+import Logo from './Logo';
 import {
   ChevronDown,
   ChevronRight,
   Home,
   FileText,
   Search,
-  Menu,
   X,
+  Sparkles,
   BookOpen,
-  Folder,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,7 +31,6 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
 
-  // Expanded categories state in sidebar (default both expanded)
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     'gate-biotechnology': true,
     'b-pharmacy-dbatu': true,
@@ -48,7 +47,6 @@ export default function Sidebar({
 
   const isNavActive = (path: string) => pathname === path;
 
-  // Filter subjects for search inside sidebar
   const filteredSubjects = (catId: string) => {
     const list = subjects.filter(s => s.category_id === catId);
     if (!sidebarSearch.trim()) return list;
@@ -62,79 +60,71 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed top-0 left-0 bottom-0 z-40 w-64 bg-notion-sidebar border-r border-notion-divider flex flex-col transition-transform duration-200 ease-in-out ${
+      className={`fixed top-0 left-0 bottom-0 z-40 w-64 bg-white border-r border-brand-border flex flex-col transition-transform duration-200 ease-in-out shadow-sm ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
     >
-      {/* Top Header / Workspace Title */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-notion-divider/60">
-        <Link
-          href="/"
-          onClick={onMobileClose}
-          className="flex items-center gap-2 text-sm font-semibold text-notion-text hover:bg-notion-hover px-2 py-1 rounded-md transition-colors"
-        >
-          <span className="text-base">🧬</span>
-          <span className="font-semibold tracking-tight">GateBT Prep</span>
-        </Link>
+      {/* Top Header / Logo */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-brand-border bg-slate-50/50">
+        <Logo onClick={onMobileClose} showTagline />
 
         {/* Mobile close button */}
         <button
           onClick={onMobileClose}
-          className="md:hidden p-1 text-notion-muted hover:text-notion-text rounded-md"
+          className="md:hidden p-1.5 text-slate-500 hover:text-brand-navy rounded-lg hover:bg-slate-100"
           aria-label="Close sidebar"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Sidebar Quick Filter Search */}
-      <div className="p-3 pb-2">
+      {/* Sidebar Quick Search */}
+      <div className="p-3">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-notion-muted absolute left-2.5 top-2.5" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
             value={sidebarSearch}
             onChange={e => setSidebarSearch(e.target.value)}
-            placeholder="Quick search subjects..."
-            className="w-full pl-8 pr-2.5 py-1.5 bg-white border border-notion-divider rounded-md text-xs text-notion-text placeholder:text-notion-muted focus:outline-none focus:border-notion-blue"
+            placeholder="Search subjects..."
+            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-brand-navy placeholder:text-slate-400 focus:outline-none focus:border-brand-azure focus:bg-white transition-all font-medium"
           />
         </div>
       </div>
 
-      {/* Scrollable Navigation Tree */}
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1 text-xs notion-scrollbar">
-        {/* Main Nav Items */}
+      {/* Navigation Tree */}
+      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1 text-xs no-scrollbar">
         <Link
           href="/"
           onClick={onMobileClose}
-          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition-all ${
             isNavActive('/')
-              ? 'bg-notion-active text-notion-blue font-semibold'
-              : 'text-notion-text hover:bg-notion-hover'
+              ? 'bg-brand-azure/10 text-brand-navy border border-brand-azure/30 shadow-xs'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-brand-navy'
           }`}
         >
-          <Home className="w-4 h-4 text-notion-muted shrink-0" />
+          <Home className={`w-4 h-4 ${isNavActive('/') ? 'text-brand-azure' : 'text-slate-400'}`} />
           <span>Home</span>
         </Link>
 
         <Link
           href="/downloads"
           onClick={onMobileClose}
-          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition-all ${
             isNavActive('/downloads')
-              ? 'bg-notion-active text-notion-blue font-semibold'
-              : 'text-notion-text hover:bg-notion-hover'
+              ? 'bg-brand-azure/10 text-brand-navy border border-brand-azure/30 shadow-xs'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-brand-navy'
           }`}
         >
-          <FileText className="w-4 h-4 text-notion-muted shrink-0" />
+          <FileText className={`w-4 h-4 ${isNavActive('/downloads') ? 'text-brand-azure' : 'text-slate-400'}`} />
           <span>All Downloads</span>
         </Link>
 
-        <div className="pt-3 pb-1 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-notion-muted">
+        <div className="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Categories & Subjects
         </div>
 
-        {/* Dynamic Categories & Subjects Accordion Tree */}
+        {/* Categories Accordion */}
         {categories.map(category => {
           const isExpanded = Boolean(expandedCategories[category.slug]);
           const catSubjects = filteredSubjects(category.id);
@@ -142,37 +132,35 @@ export default function Sidebar({
 
           return (
             <div key={category.id} className="space-y-0.5">
-              {/* Category Parent Item */}
               <div className="group flex items-center justify-between">
                 <Link
                   href={`/category/${category.slug}`}
                   onClick={onMobileClose}
-                  className={`flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-md font-semibold transition-colors truncate ${
+                  className={`flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-xl font-bold transition-all truncate ${
                     isCategoryActive
-                      ? 'bg-notion-active text-notion-blue'
-                      : 'text-notion-text hover:bg-notion-hover'
+                      ? 'bg-brand-azure/10 text-brand-navy'
+                      : 'text-brand-navy hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-sm shrink-0">{category.icon}</span>
-                  <span className="truncate">{category.name}</span>
+                  <span className="text-base shrink-0">{category.icon}</span>
+                  <span className="truncate text-xs">{category.name}</span>
                 </Link>
 
                 <button
                   onClick={() => toggleCategory(category.slug)}
-                  className="p-1 text-notion-muted hover:text-notion-text hover:bg-notion-hover rounded-md shrink-0 ml-1"
+                  className="p-1 text-slate-400 hover:text-brand-navy hover:bg-slate-100 rounded-lg shrink-0 ml-1"
                   aria-label={`Toggle ${category.name}`}
                 >
                   {isExpanded ? (
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-4 h-4" />
                   ) : (
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-4 h-4" />
                   )}
                 </button>
               </div>
 
-              {/* Sub-list of Subjects */}
               {isExpanded && (
-                <div className="pl-4 border-l border-notion-divider/70 ml-3.5 space-y-0.5">
+                <div className="pl-3.5 border-l-2 border-slate-100 ml-3 space-y-0.5 py-1">
                   {catSubjects.map(subject => {
                     const isSubjectActive = pathname === `/subject/${subject.slug}`;
                     return (
@@ -180,10 +168,10 @@ export default function Sidebar({
                         key={subject.id}
                         href={`/subject/${subject.slug}`}
                         onClick={onMobileClose}
-                        className={`flex items-center justify-between px-2 py-1 rounded-md text-[12.5px] transition-colors ${
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[12px] transition-all ${
                           isSubjectActive
-                            ? 'bg-notion-active text-notion-blue font-semibold'
-                            : 'text-notion-muted hover:text-notion-text hover:bg-notion-hover'
+                            ? 'bg-brand-azure text-white font-bold shadow-xs'
+                            : 'text-slate-600 hover:text-brand-navy hover:bg-slate-50 font-medium'
                         }`}
                       >
                         <span className="truncate flex items-center gap-1.5">
@@ -191,7 +179,9 @@ export default function Sidebar({
                           <span className="truncate">{subject.name}</span>
                         </span>
                         {subject.subject_code && (
-                          <span className="text-[10px] font-mono text-notion-muted opacity-80 shrink-0 ml-1">
+                          <span className={`text-[10px] font-mono shrink-0 ml-1 ${
+                            isSubjectActive ? 'text-white/80' : 'text-slate-400'
+                          }`}>
                             {subject.subject_code}
                           </span>
                         )}
@@ -205,10 +195,12 @@ export default function Sidebar({
         })}
       </div>
 
-      {/* Sidebar Footer */}
-      <div className="p-3 border-t border-notion-divider/80 text-[11px] text-notion-muted flex items-center justify-between">
-        <span>GateBT Prep v1.0</span>
-        <span className="px-1.5 py-0.5 rounded bg-notion-tag text-notion-text">Direct Download</span>
+      {/* Sidebar Footer Badge */}
+      <div className="p-3 border-t border-brand-border bg-slate-50 text-[11px] text-slate-500 flex items-center justify-between">
+        <span className="font-semibold text-brand-navy">@gatebt_prep</span>
+        <span className="px-2 py-0.5 rounded-md bg-brand-gold-light text-amber-800 text-[10px] font-bold">
+          IIT Prep 🚀
+        </span>
       </div>
     </aside>
   );

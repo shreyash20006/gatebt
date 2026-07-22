@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getSubjectBySlug, getResources } from '@/lib/data';
+import { getSubjectBySlug, getResources, getSubjects } from '@/lib/data';
 import SubjectView from '@/components/SubjectView';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -24,32 +24,39 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
     notFound();
   }
 
-  const resources = await getResources(subject.id);
+  const [resources, siblingSubjects] = await Promise.all([
+    getResources(subject.id),
+    getSubjects(subject.category_id),
+  ]);
 
   return (
     <div className="space-y-6">
-      {/* Notion Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-notion-muted">
-        <Link href="/" className="hover:text-notion-text hover:underline flex items-center gap-1">
-          <ArrowLeft className="w-3 h-3" /> Home
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+        <Link href="/" className="hover:text-brand-navy hover:underline flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" /> Home
         </Link>
         {subject.category && (
           <>
             <span>/</span>
             <Link
               href={`/category/${subject.category.slug}`}
-              className="hover:text-notion-text hover:underline"
+              className="hover:text-brand-navy hover:underline"
             >
               {subject.category.name}
             </Link>
           </>
         )}
         <span>/</span>
-        <span className="text-notion-text font-medium">{subject.name}</span>
+        <span className="text-brand-navy font-bold">{subject.name}</span>
       </div>
 
-      {/* Render SubjectView */}
-      <SubjectView subject={subject} resources={resources} />
+      {/* Render Vibrant SubjectView */}
+      <SubjectView
+        subject={subject}
+        resources={resources}
+        siblingSubjects={siblingSubjects}
+      />
     </div>
   );
 }

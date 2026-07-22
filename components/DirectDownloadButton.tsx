@@ -19,7 +19,7 @@ export default function DirectDownloadButton({
   filePath,
   title,
   className = '',
-  label = 'Download',
+  label = 'Download PDF',
   compact = false,
 }: DirectDownloadButtonProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle');
@@ -46,7 +46,6 @@ export default function DirectDownloadButton({
 
     try {
       if (publicUrl.startsWith('data:')) {
-        // Direct Base64 Data URI download (offline / demo mode)
         const link = document.createElement('a');
         link.href = publicUrl;
         link.download = filename;
@@ -54,7 +53,6 @@ export default function DirectDownloadButton({
         link.click();
         document.body.removeChild(link);
       } else {
-        // Live Supabase URL fetch
         const res = await fetch(publicUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -69,7 +67,6 @@ export default function DirectDownloadButton({
         URL.revokeObjectURL(blobUrl);
       }
     } catch (err) {
-      // Fallback anchor trigger for cross-origin or bucket downloads
       const link = document.createElement('a');
       link.href = publicUrl;
       link.download = filename;
@@ -85,33 +82,33 @@ export default function DirectDownloadButton({
   }
 
   const sizeStyle = compact
-    ? 'px-2.5 py-1 text-xs font-medium'
-    : 'px-3.5 py-1.5 text-xs font-medium';
+    ? 'px-3 py-1.5 text-xs font-semibold'
+    : 'px-5 py-2.5 text-xs font-bold uppercase tracking-wider';
 
   return (
     <motion.button
       type="button"
       onClick={handleDownload}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.96 }}
-      className={`inline-flex items-center justify-center gap-1.5 bg-notion-blue hover:bg-notion-blue-hover text-white rounded-md transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-notion-blue/40 shadow-xs ${sizeStyle} ${className}`}
+      whileHover={{ scale: 1.04, y: -1 }}
+      whileTap={{ scale: 0.95 }}
+      className={`inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-azure to-sky-500 hover:from-brand-azure-hover hover:to-sky-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-azure/50 ${sizeStyle} ${className}`}
       title={`Download ${title}`}
     >
       {state === 'idle' && (
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-2">
           <motion.span
             animate={{ y: [0, 2, 0] }}
             transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
           </motion.span>
           <span>{label}</span>
         </span>
       )}
 
       {state === 'loading' && (
-        <span className="flex items-center gap-1.5">
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <span className="flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span>Downloading…</span>
         </span>
       )}
@@ -121,10 +118,10 @@ export default function DirectDownloadButton({
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="flex items-center gap-1.5"
+          className="flex items-center gap-2 text-white"
         >
-          <Check className="w-3.5 h-3.5 text-emerald-200" />
-          <span>Done!</span>
+          <Check className="w-4 h-4 text-emerald-300" />
+          <span>Downloaded!</span>
         </motion.span>
       )}
     </motion.button>
