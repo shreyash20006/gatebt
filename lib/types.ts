@@ -10,7 +10,9 @@ export type Paper = {
   youtube: string;
   pdf_resources: string;
   source_name?: string;
+  source_url?: string;
   is_official?: boolean;
+  syllabus_year?: number;
   is_revised?: boolean;
 };
 
@@ -32,7 +34,7 @@ export type Resource = {
   id: number | string;
   name?: string;
   type: string;
-  subject?: string | { id: number; name: string; slug?: string; subject_code?: string; category?: { id: number; slug: string; name: string } };
+  subject?: string | { id: number | string; name: string; slug?: string; subject_code?: string | null; category?: Category | { id: number | string; slug: string; name: string } | null };
   subject_slug?: string;
   link?: string;
   rating?: number | null;
@@ -42,6 +44,7 @@ export type Resource = {
   title?: string;
   download_count?: number;
   file_size?: string;
+  created_at?: string;
 };
 
 export interface ResourceItem {
@@ -69,7 +72,7 @@ export type Subject = {
   gate_weightage?: string | null;
   category_id?: string;
   sort_order?: number;
-  category?: { id: number; slug: string; name: string } | null;
+  category?: Category | { id: number | string; slug: string; name: string } | null;
 };
 
 export interface Category {

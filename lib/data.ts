@@ -193,7 +193,7 @@ export async function getResources(subjectId?: string): Promise<Resource[]> {
 
   let list = MOCK_RESOURCES.map(r => ({
     ...r,
-    subject: subjectsMap.get(r.subject_id)
+    subject: subjectsMap.get(r.subject_id || '')
   }));
 
   if (subjectId) {
