@@ -9,7 +9,7 @@ import StoreGrid from '@/components/store/StoreGrid';
 import PyqBrowser from '@/components/PyqBrowser';
 import PaperBrowser from '@/components/PaperBrowser';
 import ResourceBrowser from '@/components/ResourceBrowser';
-import { getSubjects, getPyqs, getResources, getPaperPlans } from '@/lib/data';
+import { getSubjects, getPyqs, getResources, getPaperPlans, getResourceLibrary } from '@/lib/data';
 import { Metadata } from 'next';
 import {
   Dna,
@@ -31,16 +31,17 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [subjects, pyqs, resources, papers] = await Promise.all([
+  const [subjects, pyqs, resources, papers, resourceItems] = await Promise.all([
     getSubjects(),
     getPyqs(),
     getResources(),
     getPaperPlans(),
+    getResourceLibrary(),
   ]);
 
   const featuredSubjects = subjects.slice(0, 6);
   const samplePyqs = pyqs.slice(0, 3);
-  const sampleResources = resources.slice(0, 4);
+  const sampleResources = resourceItems.slice(0, 4);
 
   return (
     <div className="space-y-14">
