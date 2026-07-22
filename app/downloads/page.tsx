@@ -37,10 +37,11 @@ export default function DownloadsPage() {
   const resourcesBySubject = useMemo(() => {
     const map = new Map<string, { notes?: Resource; mindmap?: Resource }>();
     resources.forEach(r => {
-      const existing = map.get(r.subject_id) || {};
+      const key = r.subject_id || r.subject_slug || String(r.id);
+      const existing = map.get(key) || {};
       if (r.type === 'notes_pdf' && !existing.notes) existing.notes = r;
       if (r.type === 'mind_map' && !existing.mindmap) existing.mindmap = r;
-      map.set(r.subject_id, existing);
+      map.set(key, existing);
     });
     return map;
   }, [resources]);
