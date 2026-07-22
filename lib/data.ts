@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import { Category, Subject, Resource, Pyq } from '@/lib/types';
+import { Category, Subject, Resource, Pyq, ResourceItem } from '@/lib/types';
 
 // Hardcoded fallback dataset matching database seed for initial offline/demo preview
 const MOCK_CATEGORIES: Category[] = [
@@ -68,6 +68,31 @@ const MOCK_PYQS: Pyq[] = [
   { id: 13, question: 'Thermal death time (TDT) of micro-organisms during thermal sterilization is defined as time required to kill:', year: 2022, subject: 'Microbiology', subject_slug: 'microbiology', marks: 2, difficulty: 'Medium', options: 'A) 90% of population at given temp  B) 100% of population at given temp  C) 50% of population at given temp  D) 99.9% of population', answer: 'B' },
   { id: 14, question: 'Which parameter is used in downstream processing to characterize the resolution of two chromatographic peaks?', year: 2021, subject: 'Downstream Processing', subject_slug: 'downstream-processing', marks: 2, difficulty: 'Hard', options: 'A) Retention volume  B) Peak capacity  C) Separation factor & resolution (Rs)  D) Void volume', answer: 'C' },
   { id: 15, question: 'Which structural element in proteins is predominantly stabilized by intrachain hydrogen bonds parallel to the helix axis?', year: 2020, subject: 'Biochemistry', subject_slug: 'biochemistry', marks: 1, difficulty: 'Easy', options: 'A) Beta-pleated sheet  B) Alpha-helix  C) Reverse turn  D) Random coil', answer: 'B' }
+];
+
+const MOCK_RESOURCE_LIBRARY: ResourceItem[] = [
+  { id: 1, name: 'Lehninger Principles of Biochemistry (Nelson & Cox)', type: 'Book', subject: 'Biochemistry', subject_slug: 'biochemistry', link: 'https://archive.org/details/lehninger-principles-of-biochemistry-7th-edition', rating: 9.8 },
+  { id: 2, name: 'NPTEL Video Course: Biochemistry by Prof. Swagata Dasgupta (IIT KGP)', type: 'Video', subject: 'Biochemistry', subject_slug: 'biochemistry', link: 'https://nptel.ac.in/courses/102105034', rating: 9.5 },
+  { id: 3, name: 'Molecular Biology of the Cell (Alberts et al.)', type: 'Book', subject: 'Molecular Biology', subject_slug: 'molecular-biology', link: 'https://www.ncbi.nlm.nih.gov/books/NBK21054/', rating: 9.9 },
+  { id: 4, name: 'Khan Academy: DNA Replication, Transcription & Translation', type: 'Video', subject: 'Molecular Biology', subject_slug: 'molecular-biology', link: 'https://www.khanacademy.org/science/biology/gene-expression-central-dogma', rating: 9.4 },
+  { id: 5, name: 'Prescott’s Microbiology (Willey et al.)', type: 'Book', subject: 'Microbiology', subject_slug: 'microbiology', link: 'https://archive.org/details/prescotts-microbiology-10th-edition', rating: 9.6 },
+  { id: 6, name: 'Kuby Immunology (Punt, Stranford, Jones, Owen)', type: 'Book', subject: 'Immunology', subject_slug: 'immunology', link: 'https://archive.org/details/kuby-immunology-8th-edition', rating: 9.7 },
+  { id: 7, name: 'Principles of Gene Manipulation and Genomics (Primrose & Twyman)', type: 'Book', subject: 'Recombinant DNA Technology', subject_slug: 'recombinant-dna-technology', link: 'https://archive.org/details/principles-of-gene-manipulation', rating: 9.5 },
+  { id: 8, name: 'NCBI Molecular Biology Techniques & PCR Protocols Handbook', type: 'PDF', subject: 'Recombinant DNA Technology', subject_slug: 'recombinant-dna-technology', link: 'https://www.ncbi.nlm.nih.gov/pmc/', rating: 9.2 },
+  { id: 9, name: 'Bioprocess Engineering Principles (Pauline M. Doran)', type: 'Book', subject: 'Bioprocess Engineering', subject_slug: 'bioprocess-engineering', link: 'https://archive.org/details/bioprocess-engineering-principles-doran', rating: 9.8 },
+  { id: 10, name: 'NPTEL Bioprocess Engineering Video Series (IIT Madras)', type: 'Video', subject: 'Bioprocess Engineering', subject_slug: 'bioprocess-engineering', link: 'https://nptel.ac.in/courses/102106022', rating: 9.6 },
+  { id: 11, name: 'Protein Purification Protocols & Chromatography Guide (GE Healthcare)', type: 'PDF', subject: 'Downstream Processing', subject_slug: 'downstream-processing', link: 'https://www.cytivalifesciences.com/en/us/solutions/protein-purification', rating: 9.4 },
+  { id: 12, name: 'Principles of Genetics (Snustad & Simmons)', type: 'Book', subject: 'Genetics', subject_slug: 'genetics', link: 'https://archive.org/details/principles-of-genetics-snustad', rating: 9.4 },
+  { id: 13, name: 'NCBI BLAST Quick Reference & Algorithm Tutorial', type: 'Website', subject: 'Bioinformatics', subject_slug: 'bioinformatics', link: 'https://blast.ncbi.nlm.nih.gov/Blast.cgi', rating: 9.7 },
+  { id: 14, name: 'Bioinformatics: Sequence and Genome Analysis (David W. Mount)', type: 'Book', subject: 'Bioinformatics', subject_slug: 'bioinformatics', link: 'https://archive.org/details/bioinformatics-mount', rating: 9.3 },
+  { id: 15, name: 'Plant Biotechnology: The Genetic Manipulation of Plants (Slater et al.)', type: 'Book', subject: 'Plant Biotechnology', subject_slug: 'plant-biotechnology', link: 'https://archive.org/details/plant-biotechnology-slater', rating: 9.1 },
+  { id: 16, name: 'Culture of Animal Cells: A Manual of Basic Technique (R. Ian Freshney)', type: 'Book', subject: 'Animal Biotechnology', subject_slug: 'animal-biotechnology', link: 'https://archive.org/details/freshney-animal-cell-culture', rating: 9.5 },
+  { id: 17, name: 'Advanced Engineering Mathematics (Erwin Kreyszig)', type: 'Book', subject: 'Engineering Mathematics', subject_slug: 'engineering-mathematics', link: 'https://archive.org/details/advanced-engineering-mathematics-kreyszig', rating: 9.6 },
+  { id: 18, name: 'GATE Aptitude Formulae & Practice Questions (IIT GATE Portal)', type: 'PDF', subject: 'General Aptitude', subject_slug: 'general-aptitude', link: 'https://gate2024.iisc.ac.in/', rating: 9.3 },
+  { id: 19, name: 'Foye’s Principles of Medicinal Chemistry (Lemke et al.)', type: 'Book', subject: 'Medicinal Chemistry I', subject_slug: 'medicinal-chemistry-1', link: 'https://archive.org/details/foyes-principles-medicinal-chemistry', rating: 9.7 },
+  { id: 20, name: 'Trease and Evans Pharmacognosy (Evans)', type: 'Book', subject: 'Pharmacognosy & Phytochemistry I', subject_slug: 'pharmacognosy-phytochemistry-1', link: 'https://archive.org/details/trease-and-evans-pharmacognosy', rating: 9.6 },
+  { id: 21, name: 'Organic Chemistry by Morrison & Boyd', type: 'Book', subject: 'Pharmaceutical Organic Chemistry I', subject_slug: 'pharmaceutical-organic-chemistry-1', link: 'https://archive.org/details/organic-chemistry-morrison-boyd', rating: 9.8 },
+  { id: 22, name: 'PharmaPathshala & DBATU B.Pharmacy Official Curriculum Guides', type: 'Website', subject: 'Pharmaceutical Organic Chemistry I', subject_slug: 'pharmaceutical-organic-chemistry-1', link: 'https://dbatu.ac.in/', rating: 9.2 }
 ];
 
 const isConfigured = Boolean(
@@ -207,4 +232,27 @@ export async function getPyqs(subjectSlug?: string): Promise<Pyq[]> {
     return MOCK_PYQS.filter(p => p.subject_slug === subjectSlug);
   }
   return MOCK_PYQS;
+}
+
+export async function getResourceLibrary(subjectSlug?: string): Promise<ResourceItem[]> {
+  if (isConfigured) {
+    try {
+      let query = supabase
+        .from('resource_library')
+        .select('id,name,type,subject,subject_slug,link,rating')
+        .order('subject', { ascending: true });
+      if (subjectSlug) {
+        query = query.eq('subject_slug', subjectSlug);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) return data as ResourceItem[];
+    } catch (e) {
+      console.warn('Supabase Resource Library fetch failed, using fallback dataset', e);
+    }
+  }
+
+  if (subjectSlug) {
+    return MOCK_RESOURCE_LIBRARY.filter(r => r.subject_slug === subjectSlug);
+  }
+  return MOCK_RESOURCE_LIBRARY;
 }

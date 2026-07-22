@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileText, Brain, Download, BookOpen, Star, HelpCircle, FileCheck2, ArrowRight, Eye, Layers, HelpCircle as QuestionIcon } from 'lucide-react';
-import { Subject, Resource, Pyq } from '@/lib/types';
+import { FileText, Brain, Download, BookOpen, Star, HelpCircle, FileCheck2, ArrowRight, Eye, Layers, HelpCircle as QuestionIcon, ExternalLink } from 'lucide-react';
+import { Subject, Resource, Pyq, ResourceItem } from '@/lib/types';
 import DirectDownloadButton from './DirectDownloadButton';
 import ResourceCard from './ResourceCard';
 import { QuestionCard } from './PyqBrowser';
+import { ResourceLibraryCard } from './ResourceBrowser';
 import Link from 'next/link';
 
 interface SubjectViewProps {
@@ -13,6 +14,7 @@ interface SubjectViewProps {
   resources: Resource[];
   siblingSubjects?: Subject[];
   pyqs?: Pyq[];
+  resourceItems?: ResourceItem[];
 }
 
 export default function SubjectView({
@@ -20,6 +22,7 @@ export default function SubjectView({
   resources,
   siblingSubjects = [],
   pyqs = [],
+  resourceItems = [],
 }: SubjectViewProps) {
   // Find notes PDF and Mind map paths
   const notesResource = resources.find(r => r.type === 'notes_pdf') || resources[0];
@@ -168,7 +171,27 @@ export default function SubjectView({
         </div>
       </section>
 
-      {/* 3. PREVIOUS YEAR QUESTIONS (PYQs) SECTION FOR THIS SUBJECT */}
+      {/* 3. RECOMMENDED RESOURCES SECTION FOR THIS SUBJECT */}
+      {resourceItems.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-extrabold text-brand-navy flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-brand-azure" /> Recommended Books &amp; References ({resourceItems.length})
+            </h2>
+            <Link href="/resources" className="text-xs font-bold text-brand-azure hover:underline flex items-center gap-1">
+              View Library &rarr;
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {resourceItems.map((item, idx) => (
+              <ResourceLibraryCard key={item.id} r={item} index={idx} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4. PREVIOUS YEAR QUESTIONS (PYQs) SECTION FOR THIS SUBJECT */}
       {pyqs.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -200,7 +223,7 @@ export default function SubjectView({
         </section>
       )}
 
-      {/* 4. NOTES PREVIEW: Render note_subjects.notes_md */}
+      {/* 5. NOTES PREVIEW: Render note_subjects.notes_md */}
       {subject.notes_md ? (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
@@ -230,7 +253,7 @@ export default function SubjectView({
         </section>
       )}
 
-      {/* 5. "OTHER SUBJECTS" STRIP: Horizontal scroll of sibling subjects */}
+      {/* 6. "OTHER SUBJECTS" STRIP: Horizontal scroll of sibling subjects */}
       {siblingSubjects.length > 1 && (
         <section className="space-y-3 pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between">

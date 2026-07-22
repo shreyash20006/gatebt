@@ -50,3 +50,13 @@ export interface Pyq {
   options: string;
   answer: string;
 }
+
+export interface ResourceItem {
+  id: number;
+  name: string;
+  type: 'Book' | 'PDF' | 'Video' | 'Website' | string;
+  subject: string;
+  subject_slug: string;
+  link: string;
+  rating: number | null;
+}
