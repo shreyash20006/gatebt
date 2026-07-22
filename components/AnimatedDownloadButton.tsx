@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, CheckCircle2, CircleAlert, FileText, Loader2, Sparkles } from 'lucide-react';
-import { triggerDownload } from '@/lib/downloads';
+import { handleDirectDownload } from '@/lib/downloads';
 
 interface AnimatedDownloadButtonProps {
   url: string;
@@ -57,7 +57,7 @@ export default function AnimatedDownloadButton({
 
       // 4. Trigger download or open URL
       if (resourceId) {
-        triggerDownload(url, filename, resourceId);
+        handleDirectDownload(url, filename, String(resourceId));
       } else {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
