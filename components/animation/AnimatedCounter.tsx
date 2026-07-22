@@ -1,47 +1,46 @@
-'use client';
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { useInView } from "framer-motion";
 
-import React, { useEffect, useState, useRef } from 'react';
-
-interface AnimatedCounterProps {
-  target: number;
+export default function AnimatedCounter({
+  to,
+  target,
+  label,
+  suffix = "",
+}: {
+  to?: number;
+  target?: number;
+  label?: string;
   suffix?: string;
-  duration?: number;
-}
-
-export default function AnimatedCounter({ target, suffix = '', duration = 1500 }: AnimatedCounterProps) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const [hasAnimated, setHasAnimated] = useState(false);
+}) {
+  const finalValue = to ?? target ?? 0;
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const [n, setN] = useState(0);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
-          let start = 0;
-          const stepTime = Math.abs(Math.floor(duration / target)) || 20;
-          const timer = setInterval(() => {
-            start += Math.ceil(target / 40);
-            if (start >= target) {
-              setCount(target);
-              clearInterval(timer);
-            } else {
-              setCount(start);
-            }
-          }, stepTime);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target, duration, hasAnimated]);
+    if (!inView) return;
+    let cur = 0;
+    const step = Math.max(1, finalValue / 40);
+    const id = setInterval(() => {
+      cur += step;
+      if (cur >= finalValue) {
+        setN(finalValue);
+        clearInterval(id);
+      } else {
+        setN(Math.floor(cur));
+      }
+    }, 25);
+    return () => clearInterval(id);
+  }, [inView, finalValue]);
 
   return (
-    <span ref={ref} className="font-extrabold text-[#0B2A63]">
-      {count}
-      {suffix}
-    </span>
+    <div ref={ref} className="text-center inline-block">
+      <span className="text-3xl sm:text-4xl font-extrabold text-[#0B2A63]">
+        {n}
+        {suffix}
+      </span>
+      {label && <p className="text-xs sm:text-sm text-slate-500 mt-1">{label}</p>}
+    </div>
   );
 }
