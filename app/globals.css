@@ -10,7 +10,7 @@ html {
 
 @layer base {
   body {
-    @apply bg-brand-bg text-slate-800 antialiased min-h-screen selection:bg-brand-azure/20 selection:text-brand-navy;
+    @apply bg-brand-bg text-brand-main antialiased min-h-screen selection:bg-brand-azure/20 selection:text-brand-navy;
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
@@ -19,6 +19,15 @@ html {
     font-weight: 700;
     letter-spacing: -0.015em;
   }
+}
+
+/* Safe area padding for mobile bottom bar */
+.pb-safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.bottom-safe {
+  bottom: max(0px, env(safe-area-inset-bottom));
 }
 
 /* Custom scrollbar */
@@ -40,12 +49,19 @@ html {
   background: #1CA3DC;
 }
 
-/* Hide scrollbar for chrome, safari and opera */
+/* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Line clamp helpers */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

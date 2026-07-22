@@ -284,6 +284,22 @@ export default function SubjectView({
           </div>
         </section>
       )}
+      {/* 7. STICKY MOBILE DOWNLOAD BAR */}
+      <div className="sm:hidden fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 shadow-lg flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-[#0B2A63] truncate max-w-[180px]">{subject.name}</p>
+          <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.2 rounded-full">
+            FREE PDF
+          </span>
+        </div>
+        <DirectDownloadButton
+          resourceId={notesResource?.id || subject.id}
+          filePath={notesPath}
+          title={`${subject.name} Notes`}
+          label="Download PDF"
+          compact={true}
+        />
+      </div>
     </div>
   );
 }
