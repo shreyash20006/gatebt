@@ -17,13 +17,15 @@ export default function AllDownloadsTable({ resources }: AllDownloadsTableProps)
 
   const filteredResources = resources.filter(res => {
     const query = search.toLowerCase();
-    const titleMatch = res.title.toLowerCase().includes(query);
-    const subjectMatch = res.subject ? res.subject.name.toLowerCase().includes(query) : false;
-    const codeMatch = res.subject?.subject_code ? res.subject.subject_code.toLowerCase().includes(query) : false;
+    const titleText = (res.title || res.name || '').toLowerCase();
+    const titleMatch = titleText.includes(query);
+    const subjectObj = typeof res.subject === 'object' ? res.subject : null;
+    const subjectMatch = subjectObj ? subjectObj.name.toLowerCase().includes(query) : (typeof res.subject === 'string' ? res.subject.toLowerCase().includes(query) : false);
+    const codeMatch = subjectObj?.subject_code ? subjectObj.subject_code.toLowerCase().includes(query) : false;
 
     if (!titleMatch && !subjectMatch && !codeMatch) return false;
     if (selectedType !== 'all' && res.type !== selectedType) return false;
-    if (selectedCategory !== 'all' && res.subject?.category?.slug !== selectedCategory) return false;
+    if (selectedCategory !== 'all' && subjectObj?.category?.slug !== selectedCategory) return false;
 
     return true;
   });
@@ -133,8 +135,11 @@ export default function AllDownloadsTable({ resources }: AllDownloadsTableProps)
                     </td>
                     <td className="py-2.5 px-3 text-notion-muted">
                       {res.subject ? (
-                        <Link href={`/subject/${res.subject.slug}`} className="hover:text-notion-blue font-medium text-notion-text">
-                          {res.subject.name}
+                        <Link
+                          href={`/subject/${res.subject_slug || (typeof res.subject === 'object' ? res.subject.slug || '' : res.subject)}`}
+                          className="hover:text-notion-blue font-medium text-notion-text"
+                        >
+                          {typeof res.subject === 'object' ? res.subject.name : res.subject}
                         </Link>
                       ) : (
                         'General'
@@ -150,9 +155,9 @@ export default function AllDownloadsTable({ resources }: AllDownloadsTableProps)
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       <DirectDownloadButton
-                        resourceId={res.id}
-                        filePath={res.file_path}
-                        title={res.title}
+                        resourceId={String(res.id)}
+                        filePath={res.file_path || res.link || ''}
+                        title={res.title || res.name || 'Resource'}
                         compact
                         label="Download"
                       />

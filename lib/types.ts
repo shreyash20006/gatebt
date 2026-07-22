@@ -29,16 +29,19 @@ export type Pyq = {
 };
 
 export type Resource = {
-  id: number;
-  name: string;
+  id: number | string;
+  name?: string;
   type: string;
-  subject: string;
-  subject_slug: string;
-  link: string;
-  rating: number | null;
+  subject?: string | { id: number; name: string; slug?: string; subject_code?: string; category?: { id: number; slug: string; name: string } };
+  subject_slug?: string;
+  link?: string;
+  rating?: number | null;
   subject_id?: string;
   is_featured?: boolean;
   file_path?: string;
+  title?: string;
+  download_count?: number;
+  file_size?: string;
 };
 
 export interface ResourceItem {
@@ -52,19 +55,20 @@ export interface ResourceItem {
 }
 
 export type Subject = {
-  id: number;
+  id: number | string;
   slug: string;
   name: string;
-  tagline: string | null;
-  notes_md: string | null;
-  category_slug: string;
-  pdf_path: string | null;
-  mindmap_path: string | null;
+  tagline?: string | null;
+  notes_md?: string | null;
+  category_slug?: string;
+  pdf_path?: string | null;
+  mindmap_path?: string | null;
   icon?: string | null;
   description?: string | null;
   subject_code?: string | null;
   gate_weightage?: string | null;
   category_id?: string;
+  sort_order?: number;
   category?: { id: number; slug: string; name: string } | null;
 };
 
@@ -74,5 +78,6 @@ export interface Category {
   name: string;
   description?: string;
   icon?: string;
+  sort_order?: number;
 }
 

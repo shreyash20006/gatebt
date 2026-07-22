@@ -20,8 +20,9 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
 
   const featuredResourcesMap = new Map<string, Resource>();
   resources.forEach(r => {
-    if (!featuredResourcesMap.has(r.subject_id) || r.is_featured) {
-      featuredResourcesMap.set(r.subject_id, r);
+    const key = r.subject_id || r.subject_slug || String(r.id);
+    if (!featuredResourcesMap.has(key) || r.is_featured) {
+      featuredResourcesMap.set(key, r);
     }
   });
 
@@ -30,7 +31,7 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
     const query = searchQuery.toLowerCase();
     const nameMatch = subject.name.toLowerCase().includes(query);
     const codeMatch = subject.subject_code ? subject.subject_code.toLowerCase().includes(query) : false;
-    const descMatch = subject.description.toLowerCase().includes(query);
+    const descMatch = subject.description ? subject.description.toLowerCase().includes(query) : false;
     return nameMatch || codeMatch || descMatch;
   });
 
@@ -87,9 +88,9 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredSubjects.map((subject, idx) => {
-                const targetRes = featuredResourcesMap.get(subject.id);
+                const targetRes = featuredResourcesMap.get(String(subject.id)) || featuredResourcesMap.get(subject.slug);
                 const filePath = subject.pdf_path || targetRes?.file_path || `notes/${subject.slug}.pdf`;
-                const resId = targetRes?.id || subject.id;
+                const resId = String(targetRes?.id || subject.id);
 
                 return (
                   <RevealCard key={subject.id} index={idx}>
@@ -172,9 +173,9 @@ export default function HomeClient({ categories, subjects, resources }: HomeClie
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {catSubjects.map((subject, subIdx) => {
-                      const targetRes = featuredResourcesMap.get(subject.id);
+                      const targetRes = featuredResourcesMap.get(String(subject.id)) || featuredResourcesMap.get(subject.slug);
                       const filePath = subject.pdf_path || targetRes?.file_path || `notes/${subject.slug}.pdf`;
-                      const resId = targetRes?.id || subject.id;
+                      const resId = String(targetRes?.id || subject.id);
 
                       return (
                         <div

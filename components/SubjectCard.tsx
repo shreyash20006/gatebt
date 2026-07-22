@@ -49,7 +49,7 @@ export default function SubjectCard({ subject, featuredResource }: SubjectCardPr
       {/* Action Footer */}
       <div className="pt-3 border-t border-slate-100 space-y-2">
         <DirectDownloadButton
-          resourceId={targetResourceId}
+          resourceId={String(targetResourceId)}
           filePath={targetFilePath}
           title={`${subject.name} Notes`}
           className="w-full"

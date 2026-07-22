@@ -159,7 +159,7 @@ export default function SubjectView({
                   <span className="font-mono">{c.size}</span> · {c.downloads.toLocaleString()} dl
                 </div>
                 <DirectDownloadButton
-                  resourceId={c.resourceId}
+                  resourceId={String(c.resourceId)}
                   filePath={c.path}
                   title={`${subject.name} ${c.title}`}
                   label="Download PDF"
@@ -293,7 +293,7 @@ export default function SubjectView({
           </span>
         </div>
         <DirectDownloadButton
-          resourceId={notesResource?.id || subject.id}
+          resourceId={String(notesResource?.id || subject.id)}
           filePath={notesPath}
           title={`${subject.name} Notes`}
           label="Download PDF"

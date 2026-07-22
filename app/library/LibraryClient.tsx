@@ -92,10 +92,11 @@ export default function LibraryClient({
 
     // 3. Resources
     resources.forEach((r) => {
+      const subjectName = typeof r.subject === 'object' ? r.subject.name : (r.subject || 'Biotechnology');
       items.push({
         id: `res-${r.id}`,
-        title: r.title,
-        description: `Subject Resource for ${r.subject?.name || 'Biotechnology'}`,
+        title: r.title || r.name || 'Resource',
+        description: `Subject Resource for ${subjectName}`,
         category: 'Resource Library',
         resourceType: 'resource',
         icon: '📚',

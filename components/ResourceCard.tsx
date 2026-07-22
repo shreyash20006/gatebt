@@ -54,24 +54,24 @@ export default function ResourceCard({ resource, index = 0 }: ResourceCardProps)
               {resource.file_size}
             </span>
           )}
-          {resource.download_count > 0 && (
+          {Boolean(resource.download_count && resource.download_count > 0) && (
             <span className="text-[11px] text-notion-muted">
-              • {resource.download_count.toLocaleString()} downloads
+              • {(resource.download_count || 0).toLocaleString()} downloads
             </span>
           )}
         </div>
 
         <h3 className="text-sm font-semibold text-notion-text flex items-center gap-2">
           <FileText className="w-4 h-4 text-notion-muted shrink-0" />
-          <span>{resource.title}</span>
+          <span>{resource.title || resource.name}</span>
         </h3>
       </div>
 
       <div className="shrink-0 self-end sm:self-auto">
         <DirectDownloadButton
-          resourceId={resource.id}
-          filePath={resource.file_path}
-          title={resource.title}
+          resourceId={String(resource.id)}
+          filePath={resource.file_path || resource.link || ''}
+          title={resource.title || resource.name || 'Resource'}
           label="Download PDF"
           compact={false}
         />

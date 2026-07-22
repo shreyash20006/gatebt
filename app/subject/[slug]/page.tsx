@@ -25,7 +25,7 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
   }
 
   const [resources, siblingSubjects, pyqs, resourceItems] = await Promise.all([
-    getResources(subject.id),
+    getResources(String(subject.id)),
     getSubjects(subject.category_id),
     getPyqs(subject.slug),
     getResourceLibrary(subject.slug),

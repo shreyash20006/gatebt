@@ -167,7 +167,7 @@ export default function Sidebar({
         {/* Categories Accordion */}
         {categories.map(category => {
           const isExpanded = Boolean(expandedCategories[category.slug]);
-          const catSubjects = filteredSubjects(category.id);
+          const catSubjects = filteredSubjects(String(category.id));
           const isCategoryActive = pathname === `/category/${category.slug}`;
 
           return (
