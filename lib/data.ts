@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import { Category, Subject, Resource } from '@/lib/types';
+import { Category, Subject, Resource, Pyq } from '@/lib/types';
 
 // Hardcoded fallback dataset matching database seed for initial offline/demo preview
 const MOCK_CATEGORIES: Category[] = [
@@ -40,42 +40,34 @@ const MOCK_SUBJECTS: Subject[] = [
 ];
 
 const MOCK_RESOURCES: Resource[] = [
-  // GATE Biotechnology
-  { id: 'r-1', subject_id: 's-1', title: 'Biochemistry — Handwritten Notes (Complete PDF)', type: 'notes_pdf', file_path: 'notes/biochemistry.pdf', file_size: '14.2 MB', is_featured: true, download_count: 1240, created_at: '2026-01-10T00:00:00Z' },
-  { id: 'r-2', subject_id: 's-1', title: 'Enzyme Kinetics & Metabolic Pathways Quick Sheet', type: 'notes_pdf', file_path: 'notes/biochemistry-summary.pdf', file_size: '3.8 MB', is_featured: false, download_count: 480, created_at: '2026-01-12T00:00:00Z' },
-  { id: 'r-3', subject_id: 's-2', title: 'Molecular Biology — Handwritten Notes (Complete PDF)', type: 'notes_pdf', file_path: 'notes/molecular-biology.pdf', file_size: '16.5 MB', is_featured: true, download_count: 1150, created_at: '2026-01-10T00:00:00Z' },
-  { id: 'r-4', subject_id: 's-2', title: 'DNA Replication & Repair Mechanisms Mind Map', type: 'mind_map', file_path: 'notes/molecular-biology-mindmap.pdf', file_size: '4.1 MB', is_featured: false, download_count: 560, created_at: '2026-01-14T00:00:00Z' },
-  { id: 'r-5', subject_id: 's-3', title: 'Microbiology — Complete Handwritten Notes', type: 'notes_pdf', file_path: 'notes/microbiology.pdf', file_size: '11.8 MB', is_featured: false, download_count: 820, created_at: '2026-01-15T00:00:00Z' },
-  { id: 'r-6', subject_id: 's-4', title: 'Immunology — Complete Handwritten Notes', type: 'notes_pdf', file_path: 'notes/immunology.pdf', file_size: '9.4 MB', is_featured: false, download_count: 690, created_at: '2026-01-16T00:00:00Z' },
-  { id: 'r-7', subject_id: 's-5', title: 'Recombinant DNA Tech — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/recombinant-dna-technology.pdf', file_size: '12.1 MB', is_featured: false, download_count: 910, created_at: '2026-01-17T00:00:00Z' },
-  { id: 'r-8', subject_id: 's-6', title: 'Cell Biology — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/cell-biology.pdf', file_size: '8.7 MB', is_featured: false, download_count: 540, created_at: '2026-01-18T00:00:00Z' },
-  { id: 'r-9', subject_id: 's-7', title: 'Plant Biotechnology — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/plant-biotechnology.pdf', file_size: '7.3 MB', is_featured: false, download_count: 420, created_at: '2026-01-19T00:00:00Z' },
-  { id: 'r-10', subject_id: 's-8', title: 'Animal Biotechnology — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/animal-biotechnology.pdf', file_size: '6.9 MB', is_featured: false, download_count: 380, created_at: '2026-01-20T00:00:00Z' },
-  { id: 'r-11', subject_id: 's-9', title: 'Environmental Biotechnology — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/environmental-biotechnology.pdf', file_size: '5.5 MB', is_featured: false, download_count: 310, created_at: '2026-01-21T00:00:00Z' },
-  { id: 'r-12', subject_id: 's-10', title: 'Food Biotechnology — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/food-biotechnology.pdf', file_size: '5.2 MB', is_featured: false, download_count: 290, created_at: '2026-01-22T00:00:00Z' },
-  { id: 'r-13', subject_id: 's-11', title: 'Bioprocess Engineering — Formulae & Notes', type: 'notes_pdf', file_path: 'notes/bioprocess-engineering.pdf', file_size: '15.0 MB', is_featured: true, download_count: 1310, created_at: '2026-01-23T00:00:00Z' },
-  { id: 'r-14', subject_id: 's-12', title: 'Downstream Processing — Handwritten Notes', type: 'notes_pdf', file_path: 'notes/downstream-processing.pdf', file_size: '8.9 MB', is_featured: false, download_count: 670, created_at: '2026-01-24T00:00:00Z' },
-  { id: 'r-15', subject_id: 's-13', title: 'Genetics — Problem Solving & Notes', type: 'notes_pdf', file_path: 'notes/genetics.pdf', file_size: '7.8 MB', is_featured: false, download_count: 490, created_at: '2026-01-25T00:00:00Z' },
-  { id: 'r-16', subject_id: 's-14', title: 'Bioinformatics — Algorithm Notes', type: 'notes_pdf', file_path: 'notes/bioinformatics.pdf', file_size: '6.1 MB', is_featured: false, download_count: 430, created_at: '2026-01-26T00:00:00Z' },
-  { id: 'r-17', subject_id: 's-15', title: 'Instrumentation — Spectrophotometry & NMR Notes', type: 'notes_pdf', file_path: 'notes/instrumentation.pdf', file_size: '9.2 MB', is_featured: false, download_count: 610, created_at: '2026-01-27T00:00:00Z' },
-  { id: 'r-18', subject_id: 's-16', title: 'Engineering Mathematics — GATE Formula Sheet', type: 'notes_pdf', file_path: 'notes/engineering-mathematics.pdf', file_size: '10.5 MB', is_featured: false, download_count: 880, created_at: '2026-01-28T00:00:00Z' },
-  { id: 'r-19', subject_id: 's-17', title: 'General Aptitude — GATE Practice PDF', type: 'notes_pdf', file_path: 'notes/general-aptitude.pdf', file_size: '6.8 MB', is_featured: false, download_count: 750, created_at: '2026-01-29T00:00:00Z' },
-  
-  // GATE Extra Resources
-  { id: 'r-20', subject_id: 's-1', title: 'GATE BT Question Bank (2019–2024)', type: 'question_bank', file_path: 'notes/gate-bt-question-bank-2019-2024.pdf', file_size: '24.5 MB', is_featured: true, download_count: 2150, created_at: '2026-02-01T00:00:00Z' },
-  { id: 'r-21', subject_id: 's-2', title: 'GATE BT Mind Maps Collection', type: 'mind_map', file_path: 'notes/gate-bt-mind-maps.pdf', file_size: '18.2 MB', is_featured: true, download_count: 1890, created_at: '2026-02-02T00:00:00Z' },
-  { id: 'r-22', subject_id: 's-1', title: 'All GATE Papers Hub — GATE 2027 (30 papers)', type: 'paper', file_path: 'notes/all-gate-papers-hub-2027.pdf', file_size: '45.0 MB', is_featured: true, download_count: 3400, created_at: '2026-02-03T00:00:00Z' },
+  { id: 'r-1', subject_id: 's-1', title: 'Biochemistry — Handwritten Notes (Complete PDF)', type: 'notes_pdf', file_path: 'biochemistry.pdf', file_size: '14.2 MB', is_featured: true, download_count: 1240, created_at: '2026-01-10T00:00:00Z' },
+  { id: 'r-2', subject_id: 's-1', title: 'Enzyme Kinetics & Metabolic Pathways Quick Sheet', type: 'notes_pdf', file_path: 'biochemistry-summary.pdf', file_size: '3.8 MB', is_featured: false, download_count: 480, created_at: '2026-01-12T00:00:00Z' },
+  { id: 'r-3', subject_id: 's-2', title: 'Molecular Biology — Handwritten Notes (Complete PDF)', type: 'notes_pdf', file_path: 'molecular-biology.pdf', file_size: '16.5 MB', is_featured: true, download_count: 1150, created_at: '2026-01-10T00:00:00Z' },
+  { id: 'r-4', subject_id: 's-2', title: 'DNA Replication & Repair Mechanisms Mind Map', type: 'mind_map', file_path: 'molecular-biology-mindmap.pdf', file_size: '4.1 MB', is_featured: false, download_count: 560, created_at: '2026-01-14T00:00:00Z' },
+  { id: 'r-5', subject_id: 's-3', title: 'Microbiology — Complete Handwritten Notes', type: 'notes_pdf', file_path: 'microbiology.pdf', file_size: '11.8 MB', is_featured: false, download_count: 820, created_at: '2026-01-15T00:00:00Z' },
+  { id: 'r-6', subject_id: 's-4', title: 'Immunology — Complete Handwritten Notes', type: 'notes_pdf', file_path: 'immunology.pdf', file_size: '9.4 MB', is_featured: false, download_count: 690, created_at: '2026-01-16T00:00:00Z' },
+  { id: 'r-7', subject_id: 's-5', title: 'Recombinant DNA Tech — Handwritten Notes', type: 'notes_pdf', file_path: 'recombinant-dna.pdf', file_size: '12.1 MB', is_featured: false, download_count: 910, created_at: '2026-01-17T00:00:00Z' },
+  { id: 'r-8', subject_id: 's-11', title: 'Bioprocess Engineering — Formulae & Notes', type: 'notes_pdf', file_path: 'bioprocess.pdf', file_size: '15.0 MB', is_featured: true, download_count: 1310, created_at: '2026-01-23T00:00:00Z' },
+  { id: 'r-9', subject_id: 's-1', title: 'GATE BT Question Bank (2019–2024)', type: 'question_bank', file_path: 'gate-bt-question-bank-2019-2024.pdf', file_size: '24.5 MB', is_featured: true, download_count: 2150, created_at: '2026-02-01T00:00:00Z' },
+  { id: 'r-10', subject_id: 's-2', title: 'GATE BT Mind Maps Collection', type: 'mind_map', file_path: 'gate-bt-mind-maps.pdf', file_size: '18.2 MB', is_featured: true, download_count: 1890, created_at: '2026-02-02T00:00:00Z' }
+];
 
-  // B.Pharmacy DBATU
-  { id: 'r-23', subject_id: 's-18', title: 'BP202T — Pharmaceutical Organic Chem I (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp202t-poc1.pdf', file_size: '12.5 MB', is_featured: true, download_count: 730, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-24', subject_id: 's-19', title: 'BP301T — Pharmaceutical Organic Chem II (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp301t-poc2.pdf', file_size: '13.1 MB', is_featured: true, download_count: 680, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-25', subject_id: 's-20', title: 'BP401T — Pharmaceutical Organic Chem III (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp401t-poc3.pdf', file_size: '11.9 MB', is_featured: true, download_count: 620, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-26', subject_id: 's-21', title: 'BP402T — Medicinal Chemistry I (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp402t-medchem1.pdf', file_size: '14.0 MB', is_featured: true, download_count: 810, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-27', subject_id: 's-22', title: 'BP501T — Medicinal Chemistry II (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp501t-medchem2.pdf', file_size: '13.8 MB', is_featured: true, download_count: 760, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-28', subject_id: 's-23', title: 'BP601T — Medicinal Chemistry III (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp601t-medchem3.pdf', file_size: '14.5 MB', is_featured: true, download_count: 840, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-29', subject_id: 's-24', title: 'BP405T — Pharmacognosy & Phytochemistry I (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp405t-cognosy1.pdf', file_size: '10.8 MB', is_featured: true, download_count: 590, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-30', subject_id: 's-25', title: 'BP504T — Pharmacognosy & Phytochemistry II (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp504t-cognosy2.pdf', file_size: '11.2 MB', is_featured: true, download_count: 610, created_at: '2026-02-05T00:00:00Z' },
-  { id: 'r-31', subject_id: 's-26', title: 'BP605T — Pharmaceutical Biotechnology (25-Page Notes)', type: 'notes_pdf', file_path: 'notes/bp605t-pharmbiotech.pdf', file_size: '12.0 MB', is_featured: true, download_count: 720, created_at: '2026-02-05T00:00:00Z' }
+const MOCK_PYQS: Pyq[] = [
+  { id: 1, question: 'Which of the following enzymes is responsible for unwinding the DNA double helix during replication in Escherichia coli?', year: 2024, subject: 'Molecular Biology', subject_slug: 'molecular-biology', marks: 1, difficulty: 'Easy', options: 'A) DNA Polymerase I  B) DnaB Helicase  C) Topoisomerase II  D) Primase', answer: 'B' },
+  { id: 2, question: 'Michaelis-Menten kinetics of an enzyme-catalyzed reaction yields KM = 5 mM. At a substrate concentration of 15 mM, the reaction velocity is what percentage of Vmax?', year: 2023, subject: 'Biochemistry', subject_slug: 'biochemistry', marks: 2, difficulty: 'Medium', options: 'A) 50%  B) 66.7%  C) 75%  D) 80%', answer: 'C' },
+  { id: 3, question: 'In a stirred tank bioreactor, the oxygen transfer rate (OTR) increases directly with an increase in:', year: 2024, subject: 'Bioprocess Engineering', subject_slug: 'bioprocess-engineering', marks: 2, difficulty: 'Medium', options: 'A) Volumetric mass transfer coefficient (kLa)  B) Liquid volume  C) Viscosity of fermentation broth  D) Substrate concentration', answer: 'A' },
+  { id: 4, question: 'Which antibody isotype is primarily present in human mucosal secretions such as saliva, tears, and colostrum?', year: 2022, subject: 'Immunology', subject_slug: 'immunology', marks: 1, difficulty: 'Easy', options: 'A) IgG  B) IgM  C) IgA  D) IgE', answer: 'C' },
+  { id: 5, question: 'During cell division, sister chromatids are held together by a protein complex called:', year: 2023, subject: 'Cell Biology', subject_slug: 'cell-biology', marks: 1, difficulty: 'Easy', options: 'A) Cohesin  B) Condensin  C) Kinesin  D) Tubulin', answer: 'A' },
+  { id: 6, question: 'In Recombinant DNA Technology, which enzyme is utilized to generate complementary DNA (cDNA) from an mRNA template?', year: 2024, subject: 'Recombinant DNA Technology', subject_slug: 'recombinant-dna-technology', marks: 1, difficulty: 'Easy', options: 'A) Taq Polymerase  B) Reverse Transcriptase  C) DNA Ligase  D) Restriction Endonuclease', answer: 'B' },
+  { id: 7, question: 'What is the probability of obtaining an AABB offspring from a cross between two heterozygous Parents (AaBb x AaBb)?', year: 2023, subject: 'Genetics', subject_slug: 'genetics', marks: 2, difficulty: 'Medium', options: 'A) 1/4  B) 1/8  C) 1/16  D) 9/16', answer: 'C' },
+  { id: 8, question: 'BLAST (Basic Local Alignment Search Tool) algorithm uses which approach for fast sequence comparison?', year: 2024, subject: 'Bioinformatics', subject_slug: 'bioinformatics', marks: 1, difficulty: 'Easy', options: 'A) Needleman-Wunsch Dynamic Programming  B) Heuristic Seed Matching  C) Smith-Waterman Alignment  D) Markov Chain Monte Carlo', answer: 'B' },
+  { id: 9, question: 'The primary function of Agrobacterium tumefaciens T-DNA during plant transformation is to insert into:', year: 2022, subject: 'Plant Biotechnology', subject_slug: 'plant-biotechnology', marks: 2, difficulty: 'Hard', options: 'A) Chloroplast DNA  B) Plant Nuclear Genome  C) Mitochondrial DNA  D) Cell Wall Glycoproteins', answer: 'B' },
+  { id: 10, question: 'Monoclonal antibodies of specified antigen specificity are commercially produced by fusing myeloma cells with:', year: 2021, subject: 'Animal Biotechnology', subject_slug: 'animal-biotechnology', marks: 1, difficulty: 'Easy', options: 'A) T-lymphocytes  B) B-lymphocytes (Plasma cells)  C) Macrophages  D) Fibroblasts', answer: 'B' },
+  { id: 11, question: 'Which of the following organic reactions follows an SN1 mechanism characterized by a carbocation intermediate?', year: 2023, subject: 'Pharmaceutical Organic Chemistry I', subject_slug: 'pharmaceutical-organic-chemistry-1', marks: 2, difficulty: 'Medium', options: 'A) Hydrolysis of tert-butyl bromide  B) Reaction of primary alcohol with HBr  C) Bromination of benzene  D) Dehydration of ethanol', answer: 'A' },
+  { id: 12, question: 'A complete turn of a standard B-DNA double helix contains approximately how many base pairs?', year: 2024, subject: 'General Aptitude', subject_slug: 'general-aptitude', marks: 1, difficulty: 'Easy', options: 'A) 10.5  B) 12  C) 8.5  D) 15', answer: 'A' },
+  { id: 13, question: 'Thermal death time (TDT) of micro-organisms during thermal sterilization is defined as time required to kill:', year: 2022, subject: 'Microbiology', subject_slug: 'microbiology', marks: 2, difficulty: 'Medium', options: 'A) 90% of population at given temp  B) 100% of population at given temp  C) 50% of population at given temp  D) 99.9% of population', answer: 'B' },
+  { id: 14, question: 'Which parameter is used in downstream processing to characterize the resolution of two chromatographic peaks?', year: 2021, subject: 'Downstream Processing', subject_slug: 'downstream-processing', marks: 2, difficulty: 'Hard', options: 'A) Retention volume  B) Peak capacity  C) Separation factor & resolution (Rs)  D) Void volume', answer: 'C' },
+  { id: 15, question: 'Which structural element in proteins is predominantly stabilized by intrachain hydrogen bonds parallel to the helix axis?', year: 2020, subject: 'Biochemistry', subject_slug: 'biochemistry', marks: 1, difficulty: 'Easy', options: 'A) Beta-pleated sheet  B) Alpha-helix  C) Reverse turn  D) Random coil', answer: 'B' }
 ];
 
 const isConfigured = Boolean(
@@ -191,4 +183,28 @@ export async function getResources(subjectId?: string): Promise<Resource[]> {
 
 export async function getAllResourcesWithMetadata(): Promise<Resource[]> {
   return getResources();
+}
+
+export async function getPyqs(subjectSlug?: string): Promise<Pyq[]> {
+  if (isConfigured) {
+    try {
+      let query = supabase
+        .from('pyqs')
+        .select('id,question,year,subject,subject_slug,marks,difficulty,options,answer')
+        .order('subject', { ascending: true })
+        .order('year', { ascending: false });
+      if (subjectSlug) {
+        query = query.eq('subject_slug', subjectSlug);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) return data as Pyq[];
+    } catch (e) {
+      console.warn('Supabase PYQs fetch failed, using fallback dataset', e);
+    }
+  }
+
+  if (subjectSlug) {
+    return MOCK_PYQS.filter(p => p.subject_slug === subjectSlug);
+  }
+  return MOCK_PYQS;
 }

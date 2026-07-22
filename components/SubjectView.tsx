@@ -1,19 +1,26 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileText, Brain, Download, BookOpen, Star, HelpCircle, FileCheck2, ArrowRight, Eye, Layers } from 'lucide-react';
-import { Subject, Resource } from '@/lib/types';
+import { FileText, Brain, Download, BookOpen, Star, HelpCircle, FileCheck2, ArrowRight, Eye, Layers, HelpCircle as QuestionIcon } from 'lucide-react';
+import { Subject, Resource, Pyq } from '@/lib/types';
 import DirectDownloadButton from './DirectDownloadButton';
 import ResourceCard from './ResourceCard';
+import { QuestionCard } from './PyqBrowser';
 import Link from 'next/link';
 
 interface SubjectViewProps {
   subject: Subject;
   resources: Resource[];
   siblingSubjects?: Subject[];
+  pyqs?: Pyq[];
 }
 
-export default function SubjectView({ subject, resources, siblingSubjects = [] }: SubjectViewProps) {
+export default function SubjectView({
+  subject,
+  resources,
+  siblingSubjects = [],
+  pyqs = [],
+}: SubjectViewProps) {
   // Find notes PDF and Mind map paths
   const notesResource = resources.find(r => r.type === 'notes_pdf') || resources[0];
   const mindmapResource = resources.find(r => r.type === 'mind_map');
@@ -99,8 +106,8 @@ export default function SubjectView({ subject, resources, siblingSubjects = [] }
               <span>Revision Mind Map Included</span>
             </div>
             <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
-              <FileText className="w-4 h-4 text-emerald-400" />
-              <span>Handwritten PDF Notes</span>
+              <QuestionIcon className="w-4 h-4 text-emerald-400" />
+              <span>{pyqs.length > 0 ? `${pyqs.length} PYQs Available` : 'Handwritten PDF Notes'}</span>
             </div>
           </div>
         </div>
@@ -161,6 +168,26 @@ export default function SubjectView({ subject, resources, siblingSubjects = [] }
         </div>
       </section>
 
+      {/* 3. PREVIOUS YEAR QUESTIONS (PYQs) SECTION FOR THIS SUBJECT */}
+      {pyqs.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-extrabold text-brand-navy flex items-center gap-2">
+              <QuestionIcon className="w-5 h-5 text-brand-azure" /> Previous Year Questions ({pyqs.length})
+            </h2>
+            <Link href="/pyq" className="text-xs font-bold text-brand-azure hover:underline">
+              View All PYQs &rarr;
+            </Link>
+          </div>
+
+          <div className="grid gap-4">
+            {pyqs.map((q, idx) => (
+              <QuestionCard key={q.id} q={q} index={idx} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Additional Resources List if available */}
       {resources.length > 2 && (
         <section className="space-y-4">
@@ -173,7 +200,7 @@ export default function SubjectView({ subject, resources, siblingSubjects = [] }
         </section>
       )}
 
-      {/* 3. NOTES PREVIEW: Render note_subjects.notes_md */}
+      {/* 4. NOTES PREVIEW: Render note_subjects.notes_md */}
       {subject.notes_md ? (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
@@ -203,7 +230,7 @@ export default function SubjectView({ subject, resources, siblingSubjects = [] }
         </section>
       )}
 
-      {/* 4. "OTHER SUBJECTS" STRIP: Horizontal scroll of sibling subjects */}
+      {/* 5. "OTHER SUBJECTS" STRIP: Horizontal scroll of sibling subjects */}
       {siblingSubjects.length > 1 && (
         <section className="space-y-3 pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between">

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getSubjectBySlug, getResources, getSubjects } from '@/lib/data';
+import { getSubjectBySlug, getResources, getSubjects, getPyqs } from '@/lib/data';
 import SubjectView from '@/components/SubjectView';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: SubjectPageProps): Promise<Me
   const subject = await getSubjectBySlug(params.slug);
   if (!subject) return { title: 'Subject Not Found' };
   return {
-    title: `${subject.name} Notes & Resources`,
-    description: `Download ${subject.name} ${subject.subject_code ? `(${subject.subject_code})` : ''} handwritten notes and mind maps directly.`,
+    title: `${subject.name} Notes, PYQs & Mind Maps`,
+    description: `Download ${subject.name} ${subject.subject_code ? `(${subject.subject_code})` : ''} handwritten notes, solve previous year questions, and view revision mind maps.`,
   };
 }
 
@@ -24,9 +24,10 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
     notFound();
   }
 
-  const [resources, siblingSubjects] = await Promise.all([
+  const [resources, siblingSubjects, pyqs] = await Promise.all([
     getResources(subject.id),
     getSubjects(subject.category_id),
+    getPyqs(subject.slug),
   ]);
 
   return (
@@ -51,11 +52,12 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
         <span className="text-brand-navy font-bold">{subject.name}</span>
       </div>
 
-      {/* Render Vibrant SubjectView */}
+      {/* Render SubjectView with PYQs */}
       <SubjectView
         subject={subject}
         resources={resources}
         siblingSubjects={siblingSubjects}
+        pyqs={pyqs}
       />
     </div>
   );

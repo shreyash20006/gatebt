@@ -38,3 +38,15 @@ export interface Resource {
   created_at: string;
   subject?: Subject;
 }
+
+export interface Pyq {
+  id: number;
+  question: string;
+  year: number;
+  subject: string;
+  subject_slug: string;
+  marks: number;
+  difficulty: 'Easy' | 'Medium' | 'Hard' | string;
+  options: string;
+  answer: string;
+}

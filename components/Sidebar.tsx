@@ -12,8 +12,7 @@ import {
   FileText,
   Search,
   X,
-  Sparkles,
-  BookOpen,
+  HelpCircle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -118,6 +117,19 @@ export default function Sidebar({
         >
           <FileText className={`w-4 h-4 ${isNavActive('/downloads') ? 'text-brand-azure' : 'text-slate-400'}`} />
           <span>All Downloads</span>
+        </Link>
+
+        <Link
+          href="/pyq"
+          onClick={onMobileClose}
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition-all ${
+            isNavActive('/pyq')
+              ? 'bg-brand-azure/10 text-brand-navy border border-brand-azure/30 shadow-xs'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-brand-navy'
+          }`}
+        >
+          <HelpCircle className={`w-4 h-4 ${isNavActive('/pyq') ? 'text-brand-azure' : 'text-slate-400'}`} />
+          <span>PYQs (2019-2024)</span>
         </Link>
 
         <div className="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
