@@ -72,5 +72,11 @@ export interface PaperPlan {
   syllabus_pdf: string;
   youtube: string;
   pdf_resources: string;
+  source_name?: string;
+  source_url?: string;
+  is_official?: boolean;
+  syllabus_year?: number;
+  is_revised?: boolean;
+  updated_at?: string;
 }
 

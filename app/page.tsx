@@ -12,20 +12,20 @@ import ResourceBrowser from '@/components/ResourceBrowser';
 import { getSubjects, getPyqs, getResources, getPaperPlans, getResourceLibrary } from '@/lib/data';
 import { Metadata } from 'next';
 import {
-  Dna,
-  Pill,
-  FileQuestion,
-  BookOpen,
-  GraduationCap,
   Sparkles,
   ArrowRight,
   BadgeCheck,
+  FileQuestion,
+  GraduationCap,
+  BookOpen,
+  Download,
+  Layers,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'GateBT Prep – Free GATE Biotechnology Notes, PYQs & Mind Maps',
+  title: 'GateBT Prep – Free GATE 2027 Biotechnology Notes, PYQs & Syllabus',
   description:
-    'Download free GATE Biotechnology notes and mind maps, practise previous-year questions, and explore curated resources and GATE paper syllabi.',
+    'Download free GATE Biotechnology notes and mind maps, practise 349 PYQs, and access the latest official GATE 2027 revised syllabus PDFs.',
 };
 
 export const revalidate = 3600;
@@ -43,15 +43,103 @@ export default async function HomePage() {
   const samplePyqs = pyqs.slice(0, 3);
   const sampleResources = resourceItems.slice(0, 4);
 
+  // Dynamic calculated stats
+  const totalPyqs = pyqs.length; // 349
+  const totalSubjects = subjects.length; // 26
+  const totalResources = resourceItems.length; // 22
+  const totalPapers = papers.length; // 30
+  const totalNotesDownloads = subjects.filter((s) => s.pdf_path).length; // 26
+  const totalMindmapDownloads = subjects.filter((s) => s.mindmap_path).length; // 26
+  const totalStudyDownloads = totalNotesDownloads + totalMindmapDownloads; // 52
+  const aggregateItems = totalPyqs + totalStudyDownloads + totalResources + totalPapers; // 453
+
   return (
     <div className="space-y-14">
-      {/* 1. Hero Section */}
+      {/* 1. Video Hero Section */}
       <ParallaxHero />
 
       {/* 2. Scrolling Marquee Band */}
       <Marquee />
 
-      {/* 3. Category Cards Grid */}
+      {/* 3. Rich Material Stats Summary */}
+      <section className="bg-gradient-to-r from-[#0B2A63] via-[#0D3880] to-[#1CA3DC] rounded-3xl p-6 sm:p-10 text-white shadow-xl text-center space-y-6">
+        <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-[#F6B10A]">
+          <Layers className="w-4 h-4 text-[#F6B10A]" />
+          <span>{aggregateItems}+ Learning Items Available</span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/15">
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-[#F6B10A]">
+              <AnimatedCounter target={totalPyqs} suffix="+" />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">Practice Questions</p>
+          </div>
+
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-white">
+              <AnimatedCounter target={totalStudyDownloads} />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">Study Downloads</p>
+          </div>
+
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-white">
+              <AnimatedCounter target={totalSubjects} />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">Subject Notes</p>
+          </div>
+
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-white">
+              <AnimatedCounter target={totalSubjects} />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">Visual Mind Maps</p>
+          </div>
+
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-[#F6B10A]">
+              <AnimatedCounter target={totalResources} />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">Curated Resources</p>
+          </div>
+
+          <div className="space-y-1 pt-2 sm:pt-0">
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400">
+              <AnimatedCounter target={totalPapers} />
+            </div>
+            <p className="text-[11px] text-slate-200 font-extrabold uppercase tracking-wider">GATE 2027 Papers</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Latest GATE 2027 Syllabus Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200 mb-1">
+              <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" /> Updated for GATE 2027
+            </div>
+            <h2 className="text-2xl font-black text-[#0B2A63] tracking-tight">
+              🎓 Latest GATE 2027 Revised Syllabi
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Browse all 30 official test papers and open the latest IIT Madras syllabus PDFs directly.
+            </p>
+          </div>
+          <Link
+            href="/papers"
+            className="text-xs font-bold text-[#1CA3DC] hover:underline flex items-center gap-1"
+          >
+            <span>View All 30 Papers</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <PaperBrowser rows={papers.slice(0, 6)} />
+      </section>
+
+      {/* 5. Category Cards Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -112,8 +200,8 @@ export default async function HomePage() {
             title="All GATE Papers"
             emoji="🎓"
             iconType="paper"
-            description="Official syllabus PDFs, YouTube video playlists, & resources for all 29 papers."
-            itemCount="29 Papers"
+            description="Official syllabus PDFs, YouTube video playlists, & resources for all 30 papers."
+            itemCount="30 Papers"
             href="/papers"
           />
 
@@ -128,7 +216,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 4. Featured Downloads Grid */}
+      {/* 6. Featured Study Downloads Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -168,7 +256,7 @@ export default async function HomePage() {
         </StoreGrid>
       </section>
 
-      {/* 5. PYQ Interactive Preview */}
+      {/* 7. PYQ Interactive Practice Preview */}
       <section className="space-y-4 bg-slate-50 border border-slate-200/80 rounded-3xl p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -190,7 +278,7 @@ export default async function HomePage() {
         <PyqBrowser rows={samplePyqs} />
       </section>
 
-      {/* 6. Resource Library Preview */}
+      {/* 8. Resource Library Preview */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -211,65 +299,6 @@ export default async function HomePage() {
         </div>
 
         <ResourceBrowser rows={sampleResources} />
-      </section>
-
-      {/* 7. All GATE Papers Preview */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-black text-[#0B2A63] tracking-tight">
-              All 29 GATE Papers &amp; Syllabi
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Highlighting Biotechnology (BT) as primary paper
-            </p>
-          </div>
-          <Link
-            href="/papers"
-            className="text-xs font-bold text-[#1CA3DC] hover:underline flex items-center gap-1"
-          >
-            <span>View All Papers</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <PaperBrowser rows={papers.slice(0, 6)} />
-      </section>
-
-      {/* 8. Stats Counter Strip */}
-      <section className="bg-gradient-to-r from-[#0B2A63] via-[#0D3880] to-[#1CA3DC] rounded-3xl p-8 sm:p-10 text-white shadow-xl text-center grid grid-cols-2 md:grid-cols-5 gap-6 divide-y md:divide-y-0 md:divide-x divide-white/15">
-        <div className="space-y-1">
-          <div className="text-3xl sm:text-4xl font-black text-[#F6B10A]">
-            <AnimatedCounter target={349} suffix="+" />
-          </div>
-          <p className="text-xs text-slate-200 font-semibold uppercase tracking-wider">Solved PYQs</p>
-        </div>
-
-        <div className="space-y-1 pt-4 md:pt-0">
-          <div className="text-3xl sm:text-4xl font-black text-white">
-            <AnimatedCounter target={26} />
-          </div>
-          <p className="text-xs text-slate-200 font-semibold uppercase tracking-wider">Core Subjects</p>
-        </div>
-
-        <div className="space-y-1 pt-4 md:pt-0">
-          <div className="text-3xl sm:text-4xl font-black text-[#F6B10A]">
-            <AnimatedCounter target={22} />
-          </div>
-          <p className="text-xs text-slate-200 font-semibold uppercase tracking-wider">Curated Resources</p>
-        </div>
-
-        <div className="space-y-1 pt-4 md:pt-0">
-          <div className="text-3xl sm:text-4xl font-black text-white">
-            <AnimatedCounter target={29} />
-          </div>
-          <p className="text-xs text-slate-200 font-semibold uppercase tracking-wider">GATE Papers</p>
-        </div>
-
-        <div className="space-y-1 pt-4 md:pt-0 col-span-2 md:col-span-1">
-          <div className="text-3xl sm:text-4xl font-black text-emerald-400">100%</div>
-          <p className="text-xs text-slate-200 font-semibold uppercase tracking-wider">Free Access</p>
-        </div>
       </section>
 
       {/* 9. Bottom CTA Banner */}
