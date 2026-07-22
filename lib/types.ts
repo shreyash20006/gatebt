@@ -60,3 +60,17 @@ export interface ResourceItem {
   link: string;
   rating: number | null;
 }
+
+export interface PaperPlan {
+  id: number;
+  paper: string;
+  code: string;
+  category: string;
+  target_year: string;
+  priority: string;
+  notes: string | null;
+  syllabus_pdf: string;
+  youtube: string;
+  pdf_resources: string;
+}
+

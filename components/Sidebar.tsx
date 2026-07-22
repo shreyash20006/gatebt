@@ -14,6 +14,7 @@ import {
   X,
   HelpCircle,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -144,6 +145,19 @@ export default function Sidebar({
         >
           <BookOpen className={`w-4 h-4 ${isNavActive('/resources') ? 'text-brand-azure' : 'text-slate-400'}`} />
           <span>Resource Library</span>
+        </Link>
+
+        <Link
+          href="/papers"
+          onClick={onMobileClose}
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition-all ${
+            isNavActive('/papers')
+              ? 'bg-brand-azure/10 text-brand-navy border border-brand-azure/30 shadow-xs'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-brand-navy'
+          }`}
+        >
+          <GraduationCap className={`w-4 h-4 ${isNavActive('/papers') ? 'text-brand-azure' : 'text-slate-400'}`} />
+          <span>GATE Papers</span>
         </Link>
 
         <div className="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">

@@ -58,6 +58,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/papers" className="hover:text-brand-azure transition-colors">
+                  🎓 All GATE Papers
+                </Link>
+              </li>
+              <li>
                 <Link href="/downloads" className="hover:text-brand-azure transition-colors">
                   📄 All PDF Downloads
                 </Link>

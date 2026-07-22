@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { BookOpen, Download, Menu, X, FileText, Sparkles } from 'lucide-react';
+import { BookOpen, Download, Menu, X, FileText, Sparkles, GraduationCap } from 'lucide-react';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,6 +36,9 @@ export default function Navbar() {
             </Link>
             <Link href="/category/b-pharmacy-dbatu" className="hover:text-academic-600 transition-colors flex items-center gap-1">
               <span>🎓</span> B.Pharmacy DBATU
+            </Link>
+            <Link href="/papers" className="hover:text-academic-600 transition-colors flex items-center gap-1">
+              <GraduationCap className="w-4 h-4 text-academic-500" /> GATE Papers
             </Link>
             <Link href="/downloads" className="hover:text-academic-600 transition-colors flex items-center gap-1">
               <FileText className="w-4 h-4 text-academic-500" /> All Downloads
@@ -88,6 +91,13 @@ export default function Navbar() {
             className="block py-2 text-base font-medium text-gray-800 hover:text-academic-600"
           >
             🎓 B.Pharmacy DBATU
+          </Link>
+          <Link
+            href="/papers"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-base font-medium text-gray-800 hover:text-academic-600"
+          >
+            🎓 GATE Papers
           </Link>
           <Link
             href="/downloads"
