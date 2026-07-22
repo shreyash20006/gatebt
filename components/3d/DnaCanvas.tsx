@@ -1,83 +1,87 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-
-function HelixParticles() {
-  const pointsRef = useRef<THREE.Points>(null);
-
-  const [positions, colors] = useMemo(() => {
-    const count = 120;
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-
-    const navy = new THREE.Color('#0B2A63');
-    const azure = new THREE.Color('#1CA3DC');
-    const gold = new THREE.Color('#F6B10A');
-
-    for (let i = 0; i < count; i++) {
-      const t = (i / count) * Math.PI * 8;
-      const strand = i % 2 === 0 ? 1 : -1;
-      const radius = 1.8;
-
-      const x = Math.cos(t + (strand * Math.PI) / 2) * radius;
-      const y = (i / count) * 10 - 5;
-      const z = Math.sin(t + (strand * Math.PI) / 2) * radius;
-
-      pos[i * 3] = x;
-      pos[i * 3 + 1] = y;
-      pos[i * 3 + 2] = z;
-
-      const choice = Math.random();
-      const color = choice < 0.5 ? azure : choice < 0.8 ? navy : gold;
-      col[i * 3] = color.r;
-      col[i * 3 + 1] = color.g;
-      col[i * 3 + 2] = color.b;
-    }
-
-    return [pos, col];
-  }, []);
-
-  useFrame((_, delta) => {
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y += delta * 0.3;
-    }
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[colors, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.12}
-        vertexColors
-        transparent
-        opacity={0.85}
-        sizeAttenuation
-      />
-    </points>
-  );
-}
+import React from 'react';
+import { motion } from 'framer-motion';
 
 export default function DnaCanvas() {
+  const nodes = Array.from({ length: 16 });
+
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
-      <Canvas
-        camera={{ position: [0, 0, 8], fov: 60 }}
-        gl={{ alpha: true, antialias: true }}
-      >
-        <ambientLight intensity={0.8} />
-        <HelixParticles />
-      </Canvas>
+    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 select-none">
+      {/* Background Animated Gradient Orbs */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[#1CA3DC]/30 blur-3xl"
+      />
+
+      <motion.div
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+        }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-[#F6B10A]/20 blur-3xl"
+      />
+
+      {/* Floating Animated DNA Particle Helix Strands */}
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-3">
+        {nodes.map((_, i) => {
+          const delay = i * 0.15;
+          const isLeft = i % 2 === 0;
+          return (
+            <div key={i} className="flex items-center gap-6 justify-center relative">
+              <motion.div
+                animate={{
+                  x: isLeft ? [-14, 14, -14] : [14, -14, 14],
+                  scale: isLeft ? [0.8, 1.2, 0.8] : [1.2, 0.8, 1.2],
+                  opacity: [0.4, 0.9, 0.4],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay,
+                }}
+                className="w-3.5 h-3.5 rounded-full bg-[#1CA3DC] shadow-[0_0_10px_#1CA3DC]"
+              />
+
+              {/* Connecting DNA Base Pair Line */}
+              <motion.div
+                animate={{
+                  opacity: [0.2, 0.6, 0.2],
+                  scaleX: [0.7, 1.1, 0.7],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay,
+                }}
+                className="w-16 h-0.5 bg-gradient-to-r from-[#1CA3DC] via-white/40 to-[#F6B10A]"
+              />
+
+              <motion.div
+                animate={{
+                  x: isLeft ? [14, -14, 14] : [-14, 14, -14],
+                  scale: isLeft ? [1.2, 0.8, 1.2] : [0.8, 1.2, 0.8],
+                  opacity: [0.9, 0.4, 0.9],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay,
+                }}
+                className="w-3.5 h-3.5 rounded-full bg-[#F6B10A] shadow-[0_0_10px_#F6B10A]"
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
