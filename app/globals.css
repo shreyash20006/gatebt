@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  body {
+    @apply bg-notion-bg text-notion-text antialiased font-sans min-h-screen selection:bg-notion-active selection:text-notion-blue;
+    color: #37352F;
+    background-color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #37352F;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Custom scrollbar for Notion-style sidebar */
+.notion-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.notion-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notion-scrollbar::-webkit-scrollbar-thumb {
+  background: #E9E9E7;
+  border-radius: 4px;
+}
+
+.notion-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #D3D3D0;
+}
