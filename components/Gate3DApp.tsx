@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Logo from '@/components/brand/Logo';
 import { supabase } from '@/lib/supabase';
 import {
   Shield,
@@ -712,17 +713,11 @@ export default function Gate3DApp() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen('dashboard')}>
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg style-3d">
-                3D
-              </div>
-              <div>
-                <div className="text-base font-black tracking-tight flex items-center gap-1.5">
-                  <span>GATE Prep Hub</span>
-                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-extrabold uppercase">
-                    3D Pro
-                  </span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-medium">Direct Access • No Login Required</div>
+              <Logo size="md" />
+              <div className="hidden sm:block">
+                <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-extrabold uppercase">
+                  3D Pro
+                </span>
               </div>
             </div>
 
@@ -810,9 +805,9 @@ export default function Gate3DApp() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#1CA3DC]/10 border border-[#1CA3DC]/30 flex items-center justify-center mx-auto text-[#1CA3DC]">
-                <User className="w-6 h-6" />
+            <div className="text-center space-y-3">
+              <div className="flex justify-center">
+                <Logo size="sm" />
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Student Profile Setup</h2>
               <p className="text-xs text-slate-400">Set your name &amp; target GATE discipline to customize your preparation.</p>

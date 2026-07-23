@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Logo from '@/components/brand/Logo';
 import { UserProfile } from '@/components/onboarding/OnboardingModal';
 import {
   User as UserIcon,
@@ -60,13 +61,10 @@ export default function ProfilePage() {
     <div className="max-w-3xl mx-auto space-y-8 py-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30 text-xs font-bold mb-1.5">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Student Goal Center</span>
-          </div>
+        <div className="space-y-2">
+          <Logo size="sm" />
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Student Profile &amp; Goal Setup</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Manage your target GATE papers, degree details, and preparation preferences.</p>
+          <p className="text-xs text-slate-400">Manage your target GATE papers, degree details, and preparation preferences.</p>
         </div>
 
         <button

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Logo from '@/components/brand/Logo';
 import { useAuth } from '@/lib/auth-context';
 import { Mail, KeyRound, ArrowRight, CheckCircle2, AlertCircle, Loader2, Shield, Sparkles } from 'lucide-react';
 
@@ -76,12 +77,12 @@ export default function SupabaseAuthCard({ onSuccess }: SupabaseAuthCardProps) {
   return (
     <div className="bg-slate-900/90 border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6 max-w-md w-full mx-auto">
       {/* Card Header */}
-      <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-[#1CA3DC]/10 border border-[#1CA3DC]/30 flex items-center justify-center mx-auto text-[#1CA3DC]">
-          <Shield className="w-6 h-6" />
+      <div className="text-center space-y-3">
+        <div className="flex justify-center">
+          <Logo size="sm" />
         </div>
         <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">GATE Student Portal</h2>
-        <p className="text-xs text-slate-400">Sign in with Email OTP or OAuth Providers to save notes & sync prep progress.</p>
+        <p className="text-xs text-slate-400">Sign in with Email OTP or OAuth Providers to save notes &amp; sync prep progress.</p>
       </div>
 
       {/* Error & Success Feedback Alerts */}
