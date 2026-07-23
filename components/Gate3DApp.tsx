@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, Session } from '@supabase/supabase-js';
 import {
   Shield,
-  KeyRound,
-  Mail,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -24,14 +21,12 @@ import {
   Square,
   Moon,
   Sun,
-  LogOut,
   ChevronRight,
   FileText,
   Video,
   Layers,
   Award,
   BarChart3,
-  RefreshCw,
   Flame,
   Clock,
   Target,
@@ -47,6 +42,9 @@ import {
   Calendar,
   AlertTriangle,
   Activity,
+  User,
+  Settings,
+  X,
 } from 'lucide-react';
 
 // ==========================================
@@ -346,27 +344,25 @@ const Tilt3DCard = ({ children, className = '', maxTilt = 12, onClick }: any) =>
 };
 
 export default function Gate3DApp() {
-  // Screens: 'login' | 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
+  // Direct Access Screens (NO LOGIN WALL REQUIRED): 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
   const [currentScreen, setCurrentScreen] = useState<
-    'login' | 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
-  >('login');
+    'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
+  >('dashboard');
 
-  // Supabase Auth
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  // Student Profile State (Stored in LocalStorage - No Login Required!)
+  const [studentName, setStudentName] = useState<string>('GATE Aspirant');
+  const [selectedPaperCode, setSelectedPaperCode] = useState<string>('CE');
+  const [dailyGoalHours, setDailyGoalHours] = useState<number>(4.0);
+  const [targetGateScore, setTargetGateScore] = useState<number>(700);
 
-  // Email OTP
-  const [email, setEmail] = useState('');
-  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
-  const [otpStep, setOtpStep] = useState<'email' | 'verify'>('email');
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authSuccess, setAuthSuccess] = useState<string | null>(null);
+  // Profile Modal State
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [editName, setEditName] = useState<string>('');
+  const [editPaper, setEditPaper] = useState<string>('CE');
+  const [editGoal, setEditGoal] = useState<number>(4.0);
+  const [editTargetScore, setEditTargetScore] = useState<number>(700);
 
   // Content Selection & Progress
-  const [selectedPaperCode, setSelectedPaperCode] = useState<string>('CE');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
   const [topicNotes, setTopicNotes] = useState<Record<string, string>>({});
@@ -374,15 +370,13 @@ export default function Gate3DApp() {
   const [savingNote, setSavingNote] = useState(false);
 
   // Analytics & Reminders States
-  const [dailyGoalHours, setDailyGoalHours] = useState<number>(4.0);
-  const [targetGateScore, setTargetGateScore] = useState<number>(700);
   const [studyMinutesToday, setStudyMinutesToday] = useState<number>(145);
   const [notifPermission, setNotifPermission] = useState<string>('default');
 
   // Countdown to Feb 6, 2027
   const [daysLeft, setDaysLeft] = useState<number>(0);
 
-  // Theme
+  // Theme Mode
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('dark');
 
   // Confetti Animation Ref
@@ -403,42 +397,61 @@ export default function Gate3DApp() {
     skippedCount: number;
   } | null>(null);
 
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Load Saved Profile & Progress on Mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('Notification' in window) {
+        setNotifPermission(Notification.permission);
+      }
 
-  // Time Tracker Auto-Logger (Logs 1 minute every 60s when subject-detail page is open)
+      // Load Profile from LocalStorage
+      const savedProfile = localStorage.getItem('gate3d_student_profile');
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.name) setStudentName(parsed.name);
+          if (parsed.paper) setSelectedPaperCode(parsed.paper);
+          if (parsed.dailyGoal) setDailyGoalHours(parsed.dailyGoal);
+          if (parsed.targetScore) setTargetGateScore(parsed.targetScore);
+        } catch (e) {}
+      }
+
+      // Load Completed Topics
+      const savedTopics = localStorage.getItem('gate3d_completed_topics');
+      if (savedTopics) {
+        try {
+          setCompletedTopics(JSON.parse(savedTopics));
+        } catch (e) {}
+      }
+
+      // Load Topic Notes
+      const savedNotes = localStorage.getItem('gate3d_topic_notes');
+      if (savedNotes) {
+        try {
+          setTopicNotes(JSON.parse(savedNotes));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  // Time Tracker Auto-Logger (Logs 1 minute every 60s when viewing subject detail page)
   useEffect(() => {
     let interval: any;
-    if (currentScreen === 'subject-detail' && selectedSubject && user) {
+    if (currentScreen === 'subject-detail' && selectedSubject) {
       interval = setInterval(() => {
         setStudyMinutesToday((prev) => prev + 1);
-        // Log to Supabase study_sessions
-        supabase.from('study_sessions').insert({
-          user_id: user.id,
-          subject_id: selectedSubject.id,
-          minutes: 1,
-          session_date: new Date().toISOString().split('T')[0],
-        });
       }, 60000); // every 1 min
     }
     return () => clearInterval(interval);
-  }, [currentScreen, selectedSubject, user]);
+  }, [currentScreen, selectedSubject]);
 
-  // Countdown calculation
+  // Countdown calculation to Feb 6, 2027
   useEffect(() => {
     const examDate = new Date('2027-02-06T09:30:00+05:30').getTime();
     const now = new Date().getTime();
     const diff = Math.max(0, Math.ceil((examDate - now) / (1000 * 60 * 60 * 24)));
     setDaysLeft(diff);
   }, []);
-
-  // Resend Timer
-  useEffect(() => {
-    let interval: any;
-    if (resendTimer > 0) {
-      interval = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [resendTimer]);
 
   // Quiz Timer
   useEffect(() => {
@@ -457,65 +470,31 @@ export default function Gate3DApp() {
     return () => clearInterval(interval);
   }, [currentScreen, quizTimer]);
 
-  // Supabase Auth Initialization
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotifPermission(Notification.permission);
-    }
+  // Save Profile Handler
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = editName.trim() || 'GATE Aspirant';
+    setStudentName(name);
+    setSelectedPaperCode(editPaper);
+    setDailyGoalHours(editGoal);
+    setTargetGateScore(editTargetScore);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-      if (session?.user) {
-        loadUserData(session.user.id);
-        setCurrentScreen('dashboard');
-      }
-    });
+    const profileData = {
+      name,
+      paper: editPaper,
+      dailyGoal: editGoal,
+      targetScore: editTargetScore,
+    };
+    localStorage.setItem('gate3d_student_profile', JSON.stringify(profileData));
+    setIsProfileModalOpen(false);
+  };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-      if (session?.user) {
-        loadUserData(session.user.id);
-        setCurrentScreen('dashboard');
-      } else {
-        setCurrentScreen('login');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Load User Data
-  const loadUserData = async (userId: string) => {
-    const localPaper = localStorage.getItem(`gate3d_paper_${userId}`);
-    if (localPaper) setSelectedPaperCode(localPaper);
-
-    try {
-      const { data: topicsData } = await supabase.from('topics').select('*').eq('user_id', userId);
-      if (topicsData) {
-        const map: Record<string, boolean> = {};
-        topicsData.forEach((t) => {
-          map[`${t.subject_id}_${t.topic_name}`] = t.is_completed;
-        });
-        setCompletedTopics(map);
-      }
-    } catch (e) {}
-
-    try {
-      const { data: notesData } = await supabase.from('notes').select('*').eq('user_id', userId);
-      if (notesData) {
-        const map: Record<string, string> = {};
-        notesData.forEach((n) => {
-          map[n.topic_id] = n.content;
-        });
-        setTopicNotes(map);
-      }
-    } catch (e) {}
+  const openProfileModal = () => {
+    setEditName(studentName);
+    setEditPaper(selectedPaperCode);
+    setEditGoal(dailyGoalHours);
+    setEditTargetScore(targetGateScore);
+    setIsProfileModalOpen(true);
   };
 
   // Request Native Browser Notifications
@@ -533,116 +512,27 @@ export default function Gate3DApp() {
   };
 
   // Handle Select Paper
-  const handleSelectPaper = async (paperCode: string) => {
+  const handleSelectPaper = (paperCode: string) => {
     setSelectedPaperCode(paperCode);
-    if (user?.id) {
-      localStorage.setItem(`gate3d_paper_${user.id}`, paperCode);
-      try {
-        await supabase.from('user_profiles').upsert(
-          {
-            user_id: user.id,
-            selected_paper: paperCode,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id' }
-        );
-      } catch (e) {}
+    const saved = localStorage.getItem('gate3d_student_profile');
+    let profileData: any = {};
+    if (saved) {
+      try { profileData = JSON.parse(saved); } catch (e) {}
     }
+    profileData.paper = paperCode;
+    localStorage.setItem('gate3d_student_profile', JSON.stringify(profileData));
     setCurrentScreen('subjects');
   };
 
-  // Handle Send OTP
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
-      setAuthError('Please enter a valid email address.');
-      return;
-    }
-    setAuthError(null);
-    setAuthSuccess(null);
-    setOtpLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-        },
-      });
-      setOtpLoading(false);
-      if (error) {
-        setAuthError(error.message || 'Failed to send OTP code.');
-      } else {
-        setOtpStep('verify');
-        setResendTimer(60);
-        setAuthSuccess(`6-digit OTP code sent to ${email}!`);
-      }
-    } catch (err: any) {
-      setOtpLoading(false);
-      setAuthError(err.message || 'Network failure.');
-    }
-  };
-
-  // OTP Digit Change
-  const handleOtpDigitChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-    const newDigits = [...otpDigits];
-    newDigits[index] = value.slice(-1);
-    setOtpDigits(newDigits);
-    if (value && index < 5) otpInputRefs.current[index + 1]?.focus();
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  // Verify OTP
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = otpDigits.join('');
-    if (token.length < 6) {
-      setAuthError('Please enter all 6 digits.');
-      return;
-    }
-    setAuthError(null);
-    setAuthSuccess(null);
-    setOtpLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
-      setOtpLoading(false);
-      if (error) {
-        setAuthError(error.message || 'Invalid or expired OTP code.');
-      } else if (data.session) {
-        setSession(data.session);
-        setUser(data.session.user);
-        setCurrentScreen('dashboard');
-      }
-    } catch (err: any) {
-      setOtpLoading(false);
-      setAuthError(err.message || 'Verification failed.');
-    }
-  };
-
-  // Sign Out
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setOtpStep('email');
-    setOtpDigits(['', '', '', '', '', '']);
-    setCurrentScreen('login');
-  };
-
   // Toggle Topic Completion & Trigger Confetti 🎉 on 100%
-  const toggleTopicCompletion = async (subjectId: string, topicName: string) => {
+  const toggleTopicCompletion = (subjectId: string, topicName: string) => {
     const key = `${subjectId}_${topicName}`;
     const newStatus = !completedTopics[key];
 
     setCompletedTopics((prev) => {
       const updated = { ...prev, [key]: newStatus };
+      localStorage.setItem('gate3d_completed_topics', JSON.stringify(updated));
+
       const currentSub = (PAPER_SUBJECTS[selectedPaperCode] || []).find((s) => s.id === subjectId);
       if (currentSub) {
         const completedCount = currentSub.checklist.filter((item) => updated[`${subjectId}_${item}`]).length;
@@ -652,21 +542,6 @@ export default function Gate3DApp() {
       }
       return updated;
     });
-
-    if (user?.id) {
-      try {
-        await supabase.from('topics').upsert(
-          {
-            user_id: user.id,
-            subject_id: subjectId,
-            topic_name: topicName,
-            is_completed: newStatus,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,subject_id,topic_name' }
-        );
-      } catch (e) {}
-    }
   };
 
   // Confetti Animation 🎉
@@ -715,23 +590,14 @@ export default function Gate3DApp() {
     animate();
   };
 
-  // Save Personal Notes
-  const handleSaveTopicNote = async (topicKey: string, content: string) => {
-    setTopicNotes((prev) => ({ ...prev, [topicKey]: content }));
+  // Save Personal Notes locally
+  const handleSaveTopicNote = (topicKey: string, content: string) => {
+    setTopicNotes((prev) => {
+      const updated = { ...prev, [topicKey]: content };
+      localStorage.setItem('gate3d_topic_notes', JSON.stringify(updated));
+      return updated;
+    });
     setSavingNote(true);
-    if (user?.id) {
-      try {
-        await supabase.from('notes').upsert(
-          {
-            user_id: user.id,
-            topic_id: topicKey,
-            content,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,topic_id' }
-        );
-      } catch (e) {}
-    }
     setTimeout(() => setSavingNote(false), 800);
   };
 
@@ -756,7 +622,7 @@ export default function Gate3DApp() {
   };
 
   // Finish Quiz & Compute GATE Score
-  const handleFinishQuiz = async () => {
+  const handleFinishQuiz = () => {
     let score = 0;
     let maxScore = 0;
     let correctCount = 0;
@@ -782,30 +648,15 @@ export default function Gate3DApp() {
     const attemptedCount = correctCount + wrongCount;
     const accuracy = attemptedCount > 0 ? parseFloat(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
 
-    const result = {
+    setTestResult({
       score: finalScore,
       maxScore,
       accuracy,
       correctCount,
       wrongCount,
       skippedCount,
-    };
-
-    setTestResult(result);
+    });
     setCurrentScreen('test-result');
-
-    if (user?.id) {
-      try {
-        await supabase.from('test_attempts').insert({
-          user_id: user.id,
-          paper_code: selectedPaperCode,
-          score: finalScore,
-          max_score: maxScore,
-          accuracy,
-          taken_at: new Date().toISOString(),
-        });
-      } catch (e) {}
-    }
   };
 
   const selectedPaperObj = GATE_PAPERS.find((p) => p.code === selectedPaperCode) || GATE_PAPERS[0];
@@ -837,15 +688,6 @@ export default function Gate3DApp() {
     })
     .sort((a, b) => b.priorityScore - a.priorityScore);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 border-4 border-[#1CA3DC] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Loading 3D GATE Pro Engine...</p>
-      </div>
-    );
-  }
-
   return (
     <div
       className={`min-h-screen transition-colors duration-300 relative overflow-hidden font-sans selection:bg-[#1CA3DC] selection:text-slate-950 ${
@@ -869,7 +711,7 @@ export default function Gate3DApp() {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => user && setCurrentScreen('dashboard')}>
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen('dashboard')}>
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg style-3d">
                 3D
               </div>
@@ -880,58 +722,56 @@ export default function Gate3DApp() {
                     3D Pro
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-medium">Analytics &amp; Rank Predictor Ready</div>
+                <div className="text-[10px] text-slate-400 font-medium">Direct Access • No Login Required</div>
               </div>
             </div>
 
             {/* Navigation Tabs */}
-            {user && (
-              <div className="hidden md:flex items-center gap-1 text-xs font-bold">
-                <button
-                  onClick={() => setCurrentScreen('dashboard')}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
-                    currentScreen === 'dashboard' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                  }`}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => setCurrentScreen('paper-select')}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
-                    currentScreen === 'paper-select' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                  }`}
-                >
-                  Paper ({selectedPaperCode})
-                </button>
-                <button
-                  onClick={() => setCurrentScreen('subjects')}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
-                    currentScreen === 'subjects' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                  }`}
-                >
-                  Subjects
-                </button>
-                <button
-                  onClick={startMockQuiz}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
-                    currentScreen === 'mock-test' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                  }`}
-                >
-                  Mock Test
-                </button>
-                <button
-                  onClick={() => setCurrentScreen('analytics')}
-                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
-                    currentScreen === 'analytics' ? 'bg-purple-600 text-white' : 'text-purple-300 hover:bg-slate-900'
-                  }`}
-                >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Analytics &amp; Insights</span>
-                </button>
-              </div>
-            )}
+            <div className="hidden md:flex items-center gap-1 text-xs font-bold">
+              <button
+                onClick={() => setCurrentScreen('dashboard')}
+                className={`px-3 py-1.5 rounded-xl transition-all ${
+                  currentScreen === 'dashboard' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setCurrentScreen('paper-select')}
+                className={`px-3 py-1.5 rounded-xl transition-all ${
+                  currentScreen === 'paper-select' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                Paper ({selectedPaperCode})
+              </button>
+              <button
+                onClick={() => setCurrentScreen('subjects')}
+                className={`px-3 py-1.5 rounded-xl transition-all ${
+                  currentScreen === 'subjects' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                Subjects
+              </button>
+              <button
+                onClick={startMockQuiz}
+                className={`px-3 py-1.5 rounded-xl transition-all ${
+                  currentScreen === 'mock-test' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                Mock Test
+              </button>
+              <button
+                onClick={() => setCurrentScreen('analytics')}
+                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
+                  currentScreen === 'analytics' ? 'bg-purple-600 text-white' : 'text-purple-300 hover:bg-slate-900'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Analytics &amp; Insights</span>
+              </button>
+            </div>
 
-            {/* Right Controls */}
+            {/* Right Controls: Theme Toggle & Profile Button */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
@@ -942,137 +782,114 @@ export default function Gate3DApp() {
                 {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
 
-              {user && (
-                <div className="flex items-center gap-2">
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300">
-                    <div className="w-5 h-5 rounded-full bg-[#1CA3DC] text-slate-950 font-black text-[10px] flex items-center justify-center">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="max-w-[100px] truncate">{user.email}</span>
-                  </div>
-
-                  <button
-                    onClick={handleSignOut}
-                    className="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold flex items-center gap-1.5"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Logout</span>
-                  </button>
+              <button
+                onClick={openProfileModal}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-200 transition-all shadow-md"
+              >
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-600 to-[#1CA3DC] text-white font-black text-[11px] flex items-center justify-center">
+                  {studentName.charAt(0).toUpperCase()}
                 </div>
-              )}
+                <span className="hidden sm:inline font-semibold">{studentName}</span>
+                <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
+                  {selectedPaperCode}
+                </span>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
+      {/* 👤 STUDENT PROFILE CREATION & EDIT MODAL */}
+      {isProfileModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-md w-full space-y-6 shadow-2xl animate-fade-rise relative">
+            <button
+              onClick={() => setIsProfileModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-xl bg-slate-800/60"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-[#1CA3DC]/10 border border-[#1CA3DC]/30 flex items-center justify-center mx-auto text-[#1CA3DC]">
+                <User className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Student Profile Setup</h2>
+              <p className="text-xs text-slate-400">Set your name &amp; target GATE discipline to customize your preparation.</p>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Student Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Shreyash"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-slate-950 text-xs text-white px-4 py-3 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Target GATE Discipline</label>
+                <select
+                  value={editPaper}
+                  onChange={(e) => setEditPaper(e.target.value)}
+                  className="w-full bg-slate-950 text-xs text-white px-4 py-3 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
+                >
+                  {GATE_PAPERS.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {p.name} ({p.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Daily Hours Goal</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="14"
+                    value={editGoal}
+                    onChange={(e) => setEditGoal(Number(e.target.value))}
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Target GATE Score</label>
+                  <input
+                    type="number"
+                    step="10"
+                    min="300"
+                    max="1000"
+                    value={editTargetScore}
+                    onChange={(e) => setEditTargetScore(Number(e.target.value))}
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+              >
+                <Check className="w-4 h-4" />
+                <span>Save Profile Setup</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-        {/* STEP 1 — 🔐 LOGIN SCREEN */}
-        {currentScreen === 'login' && (
-          <div className="max-w-md mx-auto space-y-8 animate-fade-rise">
-            <Tilt3DCard maxTilt={10}>
-              <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl backdrop-blur-2xl space-y-6 relative overflow-hidden ${
-                themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/90 border-slate-200'
-              }`}>
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center mx-auto text-white shadow-lg style-3d">
-                  <Shield className="w-7 h-7" />
-                </div>
-
-                <div className="text-center space-y-2">
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">GATE 2027 Aspirant Portal</h1>
-                  <p className="text-xs text-slate-400">Enter your email for a passwordless 6-digit OTP code.</p>
-                </div>
-
-                {authError && (
-                  <div className="p-3.5 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-semibold flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                    <span>{authError}</span>
-                  </div>
-                )}
-
-                {authSuccess && (
-                  <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs font-semibold flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{authSuccess}</span>
-                  </div>
-                )}
-
-                {otpStep === 'email' && (
-                  <form onSubmit={handleSendOtp} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-400">
-                        Student Email Address
-                      </label>
-                      <div className="relative">
-                        <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="email"
-                          required
-                          placeholder="student@iit.ac.in"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className={`w-full text-xs font-semibold pl-10 pr-4 py-3 rounded-2xl border focus:outline-none focus:border-[#1CA3DC] ${
-                            themeMode === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                          }`}
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={otpLoading}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:translate-y-0.5 disabled:opacity-50"
-                    >
-                      {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Send 6-Digit OTP</span><ArrowRight className="w-4 h-4" /></>}
-                    </button>
-                  </form>
-                )}
-
-                {otpStep === 'verify' && (
-                  <form onSubmit={handleVerifyOtp} className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Enter 6-Digit OTP</label>
-                        <button type="button" onClick={() => setOtpStep('email')} className="text-[11px] font-bold text-cyan-400 hover:underline">
-                          Change Email
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2">
-                        {otpDigits.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={(el) => { otpInputRefs.current[idx] = el; }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                            className={`w-11 h-13 sm:w-12 sm:h-14 text-center font-mono font-black text-lg sm:text-xl rounded-2xl border transition-all ${
-                              digit ? 'border-cyan-400 bg-cyan-500/10 text-cyan-300 scale-105' : ''
-                            } ${themeMode === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={otpLoading}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
-                    >
-                      {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /><span>Verify OTP &amp; Enter App</span></>}
-                    </button>
-                  </form>
-                )}
-              </div>
-            </Tilt3DCard>
-          </div>
-        )}
-
-        {/* STEP 2 — 📊 DASHBOARD PAGE */}
+        {/* STEP 1 — 📊 DASHBOARD PAGE */}
         {currentScreen === 'dashboard' && (
           <div className="space-y-8 animate-fade-rise">
             {/* Top Welcome Banner & Days-Left Countdown */}
@@ -1084,10 +901,10 @@ export default function Gate3DApp() {
                     <span>GATE 2027 Preparation Portal</span>
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-                    Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{user?.email?.split('@')[0] || 'Aspirant'}</span>!
+                    Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{studentName}</span>!
                   </h1>
                   <p className="text-slate-300 text-xs sm:text-sm">
-                    Selected Paper: <strong className="text-cyan-300 font-mono">{selectedPaperObj.name} ({selectedPaperCode})</strong>
+                    Active Discipline: <strong className="text-cyan-300 font-mono">{selectedPaperObj.name} ({selectedPaperCode})</strong>
                   </p>
                 </div>
 
@@ -1251,16 +1068,16 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* STEP 3 — 📄 PAPER SELECTION PAGE */}
+        {/* STEP 2 — 📄 PAPER SELECTION PAGE */}
         {currentScreen === 'paper-select' && (
           <div className="space-y-8 animate-fade-rise">
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Authenticated Student Session</span>
+                <span>Instant Access • No Login Required</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-                Hi, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{user?.email?.split('@')[0] || 'Aspirant'}</span>! Choose your GATE Paper
+                Hi, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{studentName}</span>! Choose your GATE Paper
               </h1>
               <p className="text-xs sm:text-sm text-slate-400">
                 Select your engineering discipline to load syllabus weightage and 3D study modules.
@@ -1318,7 +1135,7 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* STEP 4 — 📚 SUBJECTS PAGE */}
+        {/* STEP 3 — 📚 SUBJECTS PAGE */}
         {currentScreen === 'subjects' && (
           <div className="space-y-8 animate-fade-rise">
             <div className="flex items-center justify-between">
@@ -1428,7 +1245,7 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* STEP 5 — 📖 SUBJECT DETAILS & PERSONAL NOTES PAGE */}
+        {/* STEP 4 — 📖 SUBJECT DETAILS & PERSONAL NOTES PAGE */}
         {currentScreen === 'subject-detail' && selectedSubject && (
           <div className="space-y-8 animate-fade-rise">
             <div className="flex items-center justify-between">
@@ -1514,7 +1331,7 @@ export default function Gate3DApp() {
                               className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-xs text-white focus:outline-none focus:border-cyan-500"
                             />
                             <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-slate-500 font-medium">Cloud Auto-Saved</span>
+                              <span className="text-[11px] text-slate-500 font-medium">Saved to Browser Storage</span>
                               <button
                                 onClick={() => handleSaveTopicNote(topicKey, noteText)}
                                 disabled={savingNote}
@@ -1574,7 +1391,7 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* PROMPT 3 — 📈 ANALYTICS & INSIGHTS PAGE */}
+        {/* STEP 5 — 📈 ANALYTICS & INSIGHTS PAGE */}
         {currentScreen === 'analytics' && (
           <div className="space-y-8 animate-fade-rise">
             {/* Navigation Header */}
@@ -1866,7 +1683,7 @@ export default function Gate3DApp() {
 
               <div className="space-y-1">
                 <h1 className="text-3xl font-black text-white">GATE Mock Test Performance Summary</h1>
-                <p className="text-xs text-slate-300">Attempt saved to Secure Cloud Storage.</p>
+                <p className="text-xs text-slate-300">Attempt saved to local preparation history.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">

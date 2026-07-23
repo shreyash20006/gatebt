@@ -139,26 +139,16 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Supabase User Profile / Sign In Button */}
-              {user ? (
-                <Link
-                  href="/profile"
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2 transition-all shadow-sm"
-                >
-                  <div className="w-5 h-5 rounded-full bg-[#1CA3DC] text-slate-950 text-[10px] font-black flex items-center justify-center">
-                    {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <span className="hidden sm:inline text-cyan-300 max-w-[100px] truncate">{user.email?.split('@')[0]}</span>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => setAuthModalOpen(true)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-cyan-400 flex items-center gap-1.5 transition-all shadow-sm"
-                >
-                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sign In</span>
-                </button>
-              )}
+              {/* Student Profile Link */}
+              <Link
+                href="/profile"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2 transition-all shadow-sm"
+              >
+                <div className="w-5 h-5 rounded-full bg-[#1CA3DC] text-slate-950 text-[10px] font-black flex items-center justify-center">
+                  {user?.email ? user.email.charAt(0).toUpperCase() : 'G'}
+                </div>
+                <span className="hidden sm:inline text-cyan-300">My Setup</span>
+              </Link>
 
               {/* Desktop CTAs */}
               <div className="hidden lg:flex items-center gap-2">
