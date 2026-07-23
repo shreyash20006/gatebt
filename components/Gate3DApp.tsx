@@ -32,15 +32,18 @@ import {
   Award,
   BarChart3,
   RefreshCw,
-  ExternalLink,
-  BookMarked,
+  Flame,
+  Clock,
+  Target,
+  Trophy,
+  Edit3,
+  Save,
+  HelpCircle,
+  RotateCcw,
+  Check,
+  ZapOff,
+  PieChart,
 } from 'lucide-react';
-
-// ==========================================
-// CONFIGURATION BLOCK
-// ==========================================
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://example.supabase.co";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "example-key";
 
 // ==========================================
 // DATA MAPS: PAPERS & SUBJECTS
@@ -116,7 +119,6 @@ interface Subject {
   weightagePercent: number;
   iconName: string;
   desc: string;
-  notesCount: number;
   checklist: string[];
 }
 
@@ -129,7 +131,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 25,
       iconName: 'Building2',
       desc: 'Engineering Mechanics, SOM, Structural Analysis, RCC & Steel Structures.',
-      notesCount: 14,
       checklist: ['Solid Mechanics (SOM) Basics', 'Bending & Shear Stresses', 'Trusses & Frames', 'RCC Beam Design', 'Steel Connections & Beams'],
     },
     {
@@ -139,7 +140,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 18,
       iconName: 'Layers',
       desc: 'Soil Mechanics, Permeability, Shear Strength, Consolidation & Foundations.',
-      notesCount: 12,
       checklist: ['Phase Relationships', 'Permeability & Seepage', 'Consolidation Theory', 'Direct Shear & Triaxial Test', 'Shallow & Deep Foundations'],
     },
     {
@@ -149,7 +149,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 15,
       iconName: 'Zap',
       desc: 'Fluid Mechanics, Hydraulics, Open Channel Flow, Hydrology & Irrigation.',
-      notesCount: 10,
       checklist: ['Fluid Statics & Dynamics', 'Pipe Flow & Losses', 'Open Channel Uniform Flow', 'Hydrograph Analysis', 'Irrigation Water Requirements'],
     },
     {
@@ -159,7 +158,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 10,
       iconName: 'Sparkles',
       desc: 'Water Quality, Treatment Processes, Sewage Treatment & Air Pollution.',
-      notesCount: 9,
       checklist: ['Water Quality Parameters', 'Sedimentation & Filtration', 'Activated Sludge Process', 'Air Pollutants & Dispersion', 'Municipal Solid Waste'],
     },
     {
@@ -169,38 +167,7 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 10,
       iconName: 'Award',
       desc: 'Highway Design, Traffic Engineering, Pavement Design & Railways.',
-      notesCount: 8,
       checklist: ['Highway Geometric Design', 'Sight Distances (SSD/OSD)', 'Traffic Flow Characteristics', 'Flexible Pavement Design', 'Rail Geometry'],
-    },
-    {
-      id: 'ce-geomatics',
-      name: 'Geomatics (Surveying)',
-      weightage: '5–7%',
-      weightagePercent: 7,
-      iconName: 'BarChart3',
-      desc: 'Levelling, Compass Surveying, Photogrammetry & Remote Sensing.',
-      notesCount: 6,
-      checklist: ['Traverse & Compass Survey', 'Differential Levelling', 'Contouring', 'Photogrammetry Formulas', 'GIS & GPS Fundamentals'],
-    },
-    {
-      id: 'ce-maths',
-      name: 'Engineering Mathematics',
-      weightage: '~13 Marks',
-      weightagePercent: 13,
-      iconName: 'FileText',
-      desc: 'Linear Algebra, Calculus, Differential Equations & Numerical Methods.',
-      notesCount: 15,
-      checklist: ['Matrices & Eigenvalues', 'Partial Derivatives & Integrals', 'First Order ODEs', 'Probability Distributions', 'Numerical Integration'],
-    },
-    {
-      id: 'ce-aptitude',
-      name: 'General Aptitude',
-      weightage: '15 Marks',
-      weightagePercent: 15,
-      iconName: 'GraduationCap',
-      desc: 'Verbal Ability, Quantitative Aptitude & Analytical Reasoning.',
-      notesCount: 8,
-      checklist: ['English Grammar & Vocabulary', 'Percentage, Ratio & Proportion', 'Data Interpretation', 'Spatial & Logical Reasoning'],
     },
   ],
   BT: [
@@ -211,18 +178,7 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 18,
       iconName: 'Dna',
       desc: 'Structure of Biomolecules, Enzyme Kinetics & Metabolic Pathways.',
-      notesCount: 12,
       checklist: ['Amino Acids & Protein Folding', 'Michaelis-Menten Kinetics', 'Glycolysis & TCA Cycle', 'Oxidative Phosphorylation', 'Lipid & Nucleotide Metabolism'],
-    },
-    {
-      id: 'bt-microbio',
-      name: 'Microbiology',
-      weightage: '12–15%',
-      weightagePercent: 15,
-      iconName: 'Sparkles',
-      desc: 'Prokaryotic Diversity, Bacterial Growth Kinetics & Virology.',
-      notesCount: 10,
-      checklist: ['Bacterial Staining & Morphology', 'Microbial Growth Curve', 'Sterilization Techniques', 'Viral Structure & Replication', 'Antibiotics Mechanism'],
     },
     {
       id: 'bt-bioprocess',
@@ -231,7 +187,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 22,
       iconName: 'Cog',
       desc: 'Mass & Energy Balances, Bioreactor Design, Sterilization & Downstream.',
-      notesCount: 14,
       checklist: ['Stoichiometry of Cell Growth', 'Design of CSTR & Batch Reactors', 'Aeration & Oxygen Transfer (kLa)', 'Media Sterilization Kinetics', 'Filtration & Chromatography'],
     },
     {
@@ -241,28 +196,7 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 16,
       iconName: 'Dna',
       desc: 'DNA Replication, Transcription, Translation, Operons & Recombinant DNA.',
-      notesCount: 11,
       checklist: ['Replication Machinery', 'Eukaryotic Transcription', 'Lac & Trp Operon Regulation', 'Restriction Enzymes & Cloning Vectors', 'PCR & DNA Sequencing'],
-    },
-    {
-      id: 'bt-maths',
-      name: 'Engineering Mathematics',
-      weightage: '~13 Marks',
-      weightagePercent: 13,
-      iconName: 'FileText',
-      desc: 'Linear Algebra, Calculus, Differential Equations & Statistics.',
-      notesCount: 12,
-      checklist: ['Matrix Operations', 'Derivatives & Integrals', 'Differential Equations', 'Mean, Variance & Normal Distribution'],
-    },
-    {
-      id: 'bt-aptitude',
-      name: 'General Aptitude',
-      weightage: '15 Marks',
-      weightagePercent: 15,
-      iconName: 'GraduationCap',
-      desc: 'Verbal Ability, Numerical Reasoning & Spatial Aptitude.',
-      notesCount: 8,
-      checklist: ['Verbal Reasoning', 'Algebra & Arithmetic', 'Logical Puzzles'],
     },
   ],
   CS: [
@@ -273,7 +207,6 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 20,
       iconName: 'Cpu',
       desc: 'Arrays, Trees, Graphs, Sorting, Dynamic Programming & Complexity.',
-      notesCount: 16,
       checklist: ['Asymptotic Notation (Big-O)', 'Binary Search Trees & AVL', 'Graph BFS/DFS & Shortest Path', 'Sorting Algorithms', 'Dynamic Programming Patterns'],
     },
     {
@@ -283,48 +216,7 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 10,
       iconName: 'Layers',
       desc: 'Process Management, Threads, CPU Scheduling, Deadlocks & Memory.',
-      notesCount: 10,
       checklist: ['Process State & Context Switching', 'Semaphores & Mutex', 'Banker\'s Deadlock Algorithm', 'Paging & Virtual Memory'],
-    },
-    {
-      id: 'cs-dbms',
-      name: 'Database Management Systems',
-      weightage: '7–9%',
-      weightagePercent: 8,
-      iconName: 'BookMarked',
-      desc: 'ER Models, Relational Algebra, SQL, Normalization & Transactions.',
-      notesCount: 9,
-      checklist: ['ER to Relational Schema', 'Relational Algebra Queries', 'SQL Joins & Grouping', 'Normal Forms (1NF to BCNF)', 'ACID & Concurrency Control'],
-    },
-    {
-      id: 'cs-networks',
-      name: 'Computer Networks',
-      weightage: '8–10%',
-      weightagePercent: 9,
-      iconName: 'Zap',
-      desc: 'OSI Layers, IP Addressing, Routing Algorithms, TCP/UDP & Congestion.',
-      notesCount: 10,
-      checklist: ['IPv4 Addressing & Subnetting', 'Sliding Window Protocols', 'Dijkstra & Distance Vector', 'TCP Handshake & Congestion'],
-    },
-    {
-      id: 'cs-maths',
-      name: 'Discrete & Engg Mathematics',
-      weightage: '13–15%',
-      weightagePercent: 14,
-      iconName: 'FileText',
-      desc: 'Propositional Logic, Combinatorics, Graph Theory & Linear Algebra.',
-      notesCount: 12,
-      checklist: ['Logic & Quantifiers', 'Permutations & Recurrence', 'Graph Colorings & Trees', 'Eigenvalues & System of Equations'],
-    },
-    {
-      id: 'cs-aptitude',
-      name: 'General Aptitude',
-      weightage: '15 Marks',
-      weightagePercent: 15,
-      iconName: 'GraduationCap',
-      desc: 'Verbal Ability & Analytical Quantitative Aptitude.',
-      notesCount: 8,
-      checklist: ['Verbal Reasoning', 'Quantitative Ability', 'Spatial Reasoning'],
     },
   ],
   EE: [
@@ -335,48 +227,7 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 14,
       iconName: 'Zap',
       desc: 'Transformers, Induction Motors, Synchronous Machines & DC Drives.',
-      notesCount: 12,
       checklist: ['Transformer Equivalent Circuit', 'Induction Motor Torque-Speed', 'Synchronous Generator Phasing', 'DC Motor Speed Control'],
-    },
-    {
-      id: 'ee-powersys',
-      name: 'Power Systems',
-      weightage: '10–13%',
-      weightagePercent: 12,
-      iconName: 'Layers',
-      desc: 'Transmission Lines, Load Flow, Symmetrical Faults & Protection.',
-      notesCount: 11,
-      checklist: ['ABCD Parameters', 'Y-Bus & Gauss-Seidel Method', 'Symmetrical Fault Analysis', 'Circuit Breakers & Relays'],
-    },
-    {
-      id: 'ee-controls',
-      name: 'Control Systems',
-      weightage: '8–10%',
-      weightagePercent: 9,
-      iconName: 'BarChart3',
-      desc: 'Transfer Functions, Root Locus, Bode Plot & State Space Analysis.',
-      notesCount: 9,
-      checklist: ['Block Diagram Reduction', 'Routh-Hurwitz Stability', 'Root Locus Construction', 'Bode Plot Gain & Phase Margin', 'State Transition Matrix'],
-    },
-    {
-      id: 'ee-maths',
-      name: 'Engineering Mathematics',
-      weightage: '13 Marks',
-      weightagePercent: 13,
-      iconName: 'FileText',
-      desc: 'Linear Algebra, Calculus, Complex Variables & Probability.',
-      notesCount: 12,
-      checklist: ['Matrices & Vector Calculus', 'Differential Equations', 'Complex Integration', 'Probability Distributions'],
-    },
-    {
-      id: 'ee-aptitude',
-      name: 'General Aptitude',
-      weightage: '15 Marks',
-      weightagePercent: 15,
-      iconName: 'GraduationCap',
-      desc: 'Verbal, Numerical & Analytical Reasoning.',
-      notesCount: 8,
-      checklist: ['Verbal Comprehension', 'Data Interpretation', 'Numerical Puzzles'],
     },
   ],
   ME: [
@@ -387,79 +238,97 @@ const PAPER_SUBJECTS: Record<string, Subject[]> = {
       weightagePercent: 14,
       iconName: 'Zap',
       desc: 'Laws of Thermodynamics, Power Cycles, Refrigeration & IC Engines.',
-      notesCount: 12,
       checklist: ['First & Second Law Systems', 'Otto, Diesel & Rankine Cycles', 'Refrigeration COP', 'Psychrometric Chart Properties'],
-    },
-    {
-      id: 'me-fluid',
-      name: 'Fluid Mechanics & Thermal',
-      weightage: '10–13%',
-      weightagePercent: 12,
-      iconName: 'Sparkles',
-      desc: 'Fluid Kinematics, Bernoulli, Boundary Layer, Heat Conduction & Convection.',
-      notesCount: 11,
-      checklist: ['Bernoulli Equation & Venturimeter', 'Boundary Layer Thickness', '1D Heat Conduction', 'Convective Heat Transfer Coefficients'],
-    },
-    {
-      id: 'me-som',
-      name: 'Strength of Materials',
-      weightage: '10–12%',
-      weightagePercent: 11,
-      iconName: 'Building2',
-      desc: 'Stress-Strain, Shear Force & Bending Moment, Torsion & Columns.',
-      notesCount: 10,
-      checklist: ['Principal Stresses & Mohr Circle', 'SFD & BMD Diagrams', 'Torsion of Circular Shafts', 'Euler Column Buckling'],
-    },
-    {
-      id: 'me-manufacturing',
-      name: 'Manufacturing & Industrial',
-      weightage: '15–18%',
-      weightagePercent: 16,
-      iconName: 'Cog',
-      desc: 'Casting, Welding, Metal Cutting, Metrology & Production Control.',
-      notesCount: 14,
-      checklist: ['Riser & Gating Design', 'Merchant Circle Orthogonal Cutting', 'Resistance Welding', 'EOQ & Inventory Control', 'PERT/CPM Networks'],
-    },
-    {
-      id: 'me-maths',
-      name: 'Engineering Mathematics',
-      weightage: '13 Marks',
-      weightagePercent: 13,
-      iconName: 'FileText',
-      desc: 'Linear Algebra, Calculus, Fourier Series & Numerical Methods.',
-      notesCount: 12,
-      checklist: ['Matrix Eigenvalues', 'Vector Calculus Gradient/Divergence', 'Differential Equations', 'Numerical Methods'],
-    },
-    {
-      id: 'me-aptitude',
-      name: 'General Aptitude',
-      weightage: '15 Marks',
-      weightagePercent: 15,
-      iconName: 'GraduationCap',
-      desc: 'Verbal, Quantitative & Analytical Reasoning.',
-      notesCount: 8,
-      checklist: ['Verbal Ability', 'Numerical Computation', 'Logical Aptitude'],
     },
   ],
 };
 
-// Custom Hook for 3D Tilt Effect on Mouse move
+interface Question {
+  id: string;
+  paper_code: string;
+  subject: string;
+  question: string;
+  options: string[];
+  correct_answer: number;
+  marks: number;
+  negative_marks: number;
+  explanation: string;
+}
+
+const SAMPLE_QUESTIONS: Question[] = [
+  {
+    id: 'q1',
+    paper_code: 'CE',
+    subject: 'Structural Engineering',
+    question: 'What is the maximum shear stress in a circular shaft subjected to torque T and diameter D?',
+    options: ['16T / (π D³)', '32T / (π D³)', '8T / (π D³)', '64T / (π D³)'],
+    correct_answer: 0,
+    marks: 1,
+    negative_marks: 0.33,
+    explanation: 'The maximum shear stress τ_max in a circular solid shaft under torsion is given by τ = 16T / (π D³).',
+  },
+  {
+    id: 'q2',
+    paper_code: 'CE',
+    subject: 'Structural Engineering',
+    question: 'In a simply supported beam of span L with a central point load W, the maximum bending moment is:',
+    options: ['W L / 8', 'W L / 4', 'W L / 2', 'W L'],
+    correct_answer: 1,
+    marks: 2,
+    negative_marks: 0.67,
+    explanation: 'Maximum bending moment for a simply supported beam under central point load W occurs at center and equals W L / 4.',
+  },
+  {
+    id: 'q3',
+    paper_code: 'CE',
+    subject: 'Geotechnical Engineering',
+    question: 'According to Terzaghi, the ultimate bearing capacity for a continuous strip footing is:',
+    options: [
+      'c N_c + q N_q + 0.5 γ B N_γ',
+      '1.3 c N_c + q N_q + 0.4 γ B N_γ',
+      'c N_c + q N_q + 0.3 γ B N_γ',
+      '1.3 c N_c + q N_q + 0.3 γ B N_γ',
+    ],
+    correct_answer: 0,
+    marks: 1,
+    negative_marks: 0.33,
+    explanation: 'Terzaghi ultimate bearing capacity equation for strip footing: q_u = c N_c + q N_q + 0.5 γ B N_γ.',
+  },
+  {
+    id: 'q4',
+    paper_code: 'CE',
+    subject: 'Water Resources Engineering',
+    question: 'The Froude number F_r for open channel flow is defined as:',
+    options: ['V / √(g y)', 'V / (g y)', 'V² / (g y)', '√(V / g y)'],
+    correct_answer: 0,
+    marks: 1,
+    negative_marks: 0.33,
+    explanation: 'Froude number F_r = V / √(g y), representing ratio of inertial to gravitational forces.',
+  },
+  {
+    id: 'q5',
+    paper_code: 'BT',
+    subject: 'Biochemistry',
+    question: 'The Km value of an enzyme represents:',
+    options: ['Substrate concentration at Vmax', 'Substrate concentration at half Vmax', 'Maximum reaction velocity', 'Enzyme concentration'],
+    correct_answer: 1,
+    marks: 1,
+    negative_marks: 0.33,
+    explanation: 'Michaelis constant Km equals the substrate concentration at which reaction rate is half of Vmax.',
+  },
+];
+
+// Custom 3D Tilt Hook
 function use3DTilt(maxTilt = 15) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-
-    // Responsive safety check
-    if (window.innerWidth < 640) return;
-
+    if (!cardRef.current || window.innerWidth < 640) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-
     const rotateX = (-(y / (rect.height / 2)) * maxTilt).toFixed(2);
     const rotateY = ((x / (rect.width / 2)) * maxTilt).toFixed(2);
-
     cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
   };
 
@@ -471,10 +340,8 @@ function use3DTilt(maxTilt = 15) {
   return { cardRef, handleMouseMove, handleMouseLeave };
 }
 
-// 3D Tilt Card Component Wrapper
 const Tilt3DCard = ({ children, className = '', maxTilt = 12, onClick }: any) => {
   const { cardRef, handleMouseMove, handleMouseLeave } = use3DTilt(maxTilt);
-
   return (
     <div
       ref={cardRef}
@@ -489,8 +356,10 @@ const Tilt3DCard = ({ children, className = '', maxTilt = 12, onClick }: any) =>
 };
 
 export default function Gate3DApp() {
-  // Navigation Screens: 'login' | 'paper-select' | 'subjects' | 'subject-detail'
-  const [currentScreen, setCurrentScreen] = useState<'login' | 'paper-select' | 'subjects' | 'subject-detail'>('login');
+  // Navigation Screens: 'login' | 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result'
+  const [currentScreen, setCurrentScreen] = useState<
+    'login' | 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result'
+  >('login');
 
   // Supabase Auth States
   const [user, setUser] = useState<User | null>(null);
@@ -506,37 +375,83 @@ export default function Gate3DApp() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
-  // App Content Selection States
+  // Selection & Progress States
   const [selectedPaperCode, setSelectedPaperCode] = useState<string>('CE');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
+  const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
+  const [topicNotes, setTopicNotes] = useState<Record<string, string>>({});
+  const [activeTopicNoteId, setActiveTopicNoteId] = useState<string | null>(null);
+  const [savingNote, setSavingNote] = useState(false);
 
-  // Theme Mode: Dark (default) vs Light
+  // Countdown to Feb 6, 2027
+  const [daysLeft, setDaysLeft] = useState<number>(0);
+
+  // Theme Mode
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('dark');
 
-  // OTP Input Box References
+  // Confetti Canvas Animation Ref
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Mock Test Engine States
+  const [quizQuestions, setQuizQuestions] = useState<Question[]>(SAMPLE_QUESTIONS);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({});
+  const [quizTimer, setQuizTimer] = useState<number>(600); // 10 minutes in seconds
+  const [testResult, setTestResult] = useState<{
+    score: number;
+    maxScore: number;
+    accuracy: number;
+    correctCount: number;
+    wrongCount: number;
+    skippedCount: number;
+  } | null>(null);
+
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Timer for Resend OTP
+  // Countdown timer calculation
+  useEffect(() => {
+    const examDate = new Date('2027-02-06T09:30:00+05:30').getTime();
+    const now = new Date().getTime();
+    const diff = Math.max(0, Math.ceil((examDate - now) / (1000 * 60 * 60 * 24)));
+    setDaysLeft(diff);
+  }, []);
+
+  // Resend OTP Countdown
   useEffect(() => {
     let interval: any;
     if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
+      interval = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Supabase Session Listener
+  // Quiz Countdown Timer
+  useEffect(() => {
+    let interval: any;
+    if (currentScreen === 'mock-test' && quizTimer > 0) {
+      interval = setInterval(() => {
+        setQuizTimer((prev) => {
+          if (prev <= 1) {
+            handleFinishQuiz();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [currentScreen, quizTimer]);
+
+  // Supabase Auth & Initial State Load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setAuthLoading(false);
       if (session?.user) {
-        loadUserSelectedPaper(session.user.id);
-        setCurrentScreen('paper-select');
+        loadUserData(session.user.id);
+        setCurrentScreen('dashboard');
       }
     });
 
@@ -547,7 +462,8 @@ export default function Gate3DApp() {
       setUser(session?.user ?? null);
       setAuthLoading(false);
       if (session?.user) {
-        loadUserSelectedPaper(session.user.id);
+        loadUserData(session.user.id);
+        setCurrentScreen('dashboard');
       } else {
         setCurrentScreen('login');
       }
@@ -556,21 +472,42 @@ export default function Gate3DApp() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load Saved Paper from localStorage or Supabase
-  const loadUserSelectedPaper = (userId: string) => {
+  // Load User Paper, Topics, & Notes
+  const loadUserData = async (userId: string) => {
+    // 1. Paper selection
     const localPaper = localStorage.getItem(`gate3d_paper_${userId}`);
-    if (localPaper) {
-      setSelectedPaperCode(localPaper);
-    }
+    if (localPaper) setSelectedPaperCode(localPaper);
+
+    // 2. Load Topics Completion from Supabase
+    try {
+      const { data: topicsData } = await supabase.from('topics').select('*').eq('user_id', userId);
+      if (topicsData && topicsData.length > 0) {
+        const topicMap: Record<string, boolean> = {};
+        topicsData.forEach((t) => {
+          topicMap[`${t.subject_id}_${t.topic_name}`] = t.is_completed;
+        });
+        setCompletedTopics(topicMap);
+      }
+    } catch (e) {}
+
+    // 3. Load Notes from Supabase
+    try {
+      const { data: notesData } = await supabase.from('notes').select('*').eq('user_id', userId);
+      if (notesData && notesData.length > 0) {
+        const notesMap: Record<string, string> = {};
+        notesData.forEach((n) => {
+          notesMap[n.topic_id] = n.content;
+        });
+        setTopicNotes(notesMap);
+      }
+    } catch (e) {}
   };
 
-  // Save Selected Paper to Supabase user_profiles & localStorage
+  // Handle Select Paper
   const handleSelectPaper = async (paperCode: string) => {
     setSelectedPaperCode(paperCode);
-
     if (user?.id) {
       localStorage.setItem(`gate3d_paper_${user.id}`, paperCode);
-
       try {
         await supabase.from('user_profiles').upsert(
           {
@@ -580,11 +517,8 @@ export default function Gate3DApp() {
           },
           { onConflict: 'user_id' }
         );
-      } catch (err) {
-        // Fallback gracefully if user_profiles table doesn't exist yet
-      }
+      } catch (e) {}
     }
-
     setCurrentScreen('subjects');
   };
 
@@ -595,7 +529,6 @@ export default function Gate3DApp() {
       setAuthError('Please enter a valid email address.');
       return;
     }
-
     setAuthError(null);
     setAuthSuccess(null);
     setOtpLoading(true);
@@ -607,81 +540,64 @@ export default function Gate3DApp() {
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
       });
-
       setOtpLoading(false);
-
       if (error) {
-        setAuthError(error.message || 'Failed to send OTP code. Please try again.');
+        setAuthError(error.message || 'Failed to send OTP code.');
       } else {
         setOtpStep('verify');
         setResendTimer(60);
-        setAuthSuccess(`6-digit OTP code sent to ${email}!`);
+        setAuthSuccess(`6-digit OTP sent to ${email}!`);
       }
     } catch (err: any) {
       setOtpLoading(false);
-      setAuthError(err.message || 'Network error occurred.');
+      setAuthError(err.message || 'Network error.');
     }
   };
 
-  // Handle OTP Input Box Digit Change
+  // OTP Digit Change
   const handleOtpDigitChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
-
     const newDigits = [...otpDigits];
     newDigits[index] = value.slice(-1);
     setOtpDigits(newDigits);
-
-    // Auto-focus next input box
-    if (value && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
+    if (value && index < 5) otpInputRefs.current[index + 1]?.focus();
   };
 
-  // Handle Backspace Key in OTP Boxes
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
       otpInputRefs.current[index - 1]?.focus();
     }
   };
 
-  // Handle Verify OTP
+  // Verify OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = otpDigits.join('');
-
     if (token.length < 6) {
-      setAuthError('Please enter all 6 digits of your OTP code.');
+      setAuthError('Please enter all 6 digits.');
       return;
     }
-
     setAuthError(null);
     setAuthSuccess(null);
     setOtpLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: 'email',
-      });
-
+      const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
       setOtpLoading(false);
-
       if (error) {
-        setAuthError(error.message || 'Invalid or expired OTP code. Check and try again.');
+        setAuthError(error.message || 'Invalid or expired OTP code.');
       } else if (data.session) {
         setSession(data.session);
         setUser(data.session.user);
-        setAuthSuccess('Successfully authenticated with Supabase!');
-        setCurrentScreen('paper-select');
+        setCurrentScreen('dashboard');
       }
     } catch (err: any) {
       setOtpLoading(false);
-      setAuthError(err.message || 'Verification failed. Please retry.');
+      setAuthError(err.message || 'Verification failed.');
     }
   };
 
-  // Handle Sign Out
+  // Sign Out
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -691,22 +607,199 @@ export default function Gate3DApp() {
     setCurrentScreen('login');
   };
 
-  // Toggle Checklist Task
-  const toggleChecklist = (taskId: string) => {
-    setCompletedTasks((prev) => ({ ...prev, [taskId]: !prev[taskId] }));
+  // Toggle Topic Completion Optimistically & Sync Supabase
+  const toggleTopicCompletion = async (subjectId: string, topicName: string) => {
+    const key = `${subjectId}_${topicName}`;
+    const newStatus = !completedTopics[key];
+
+    // Optimistic UI update
+    setCompletedTopics((prev) => {
+      const updated = { ...prev, [key]: newStatus };
+
+      // Check if subject is now 100% completed -> Fire Confetti 🎉
+      const currentSub = (PAPER_SUBJECTS[selectedPaperCode] || []).find((s) => s.id === subjectId);
+      if (currentSub) {
+        const completedCount = currentSub.checklist.filter((item) => updated[`${subjectId}_${item}`]).length;
+        if (completedCount === currentSub.checklist.length) {
+          triggerConfetti();
+        }
+      }
+      return updated;
+    });
+
+    // Sync with Supabase
+    if (user?.id) {
+      try {
+        await supabase.from('topics').upsert(
+          {
+            user_id: user.id,
+            subject_id: subjectId,
+            topic_name: topicName,
+            is_completed: newStatus,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,subject_id,topic_name' }
+        );
+      } catch (e) {}
+    }
+  };
+
+  // Trigger Confetti Animation 🎉
+  const triggerConfetti = () => {
+    const canvas = confettiCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: any[] = [];
+    const colors = ['#1CA3DC', '#A855F7', '#EC4899', '#3B82F6', '#F59E0B', '#10B981'];
+
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 14,
+        vy: (Math.random() - 0.7) * 16,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1,
+      });
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+
+      particles.forEach((p) => {
+        if (p.alpha > 0) {
+          alive = true;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.4; // gravity
+          p.alpha -= 0.015;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+          ctx.restore();
+        }
+      });
+
+      if (alive) requestAnimationFrame(animate);
+    };
+
+    animate();
+  };
+
+  // Save Topic Personal Notes to Supabase
+  const handleSaveTopicNote = async (topicKey: string, content: string) => {
+    setTopicNotes((prev) => ({ ...prev, [topicKey]: content }));
+    setSavingNote(true);
+
+    if (user?.id) {
+      try {
+        await supabase.from('notes').upsert(
+          {
+            user_id: user.id,
+            topic_id: topicKey,
+            content,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,topic_id' }
+        );
+      } catch (e) {}
+    }
+    setTimeout(() => setSavingNote(false), 800);
+  };
+
+  // Start Quiz Session
+  const startMockQuiz = () => {
+    setQuizQuestions(SAMPLE_QUESTIONS);
+    setCurrentQuestionIndex(0);
+    setUserAnswers({});
+    setMarkedForReview({});
+    setQuizTimer(600); // 10 mins
+    setTestResult(null);
+    setCurrentScreen('mock-test');
+  };
+
+  // Select Quiz Option
+  const handleSelectQuizOption = (optionIndex: number) => {
+    setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: optionIndex }));
+  };
+
+  // Toggle Mark For Review
+  const toggleMarkForReview = () => {
+    setMarkedForReview((prev) => ({ ...prev, [currentQuestionIndex]: !prev[currentQuestionIndex] }));
+  };
+
+  // Finish Quiz & Compute Score
+  const handleFinishQuiz = async () => {
+    let score = 0;
+    let maxScore = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let skippedCount = 0;
+
+    quizQuestions.forEach((q, idx) => {
+      maxScore += q.marks;
+      const selectedOpt = userAnswers[idx];
+
+      if (selectedOpt === undefined) {
+        skippedCount++;
+      } else if (selectedOpt === q.correct_answer) {
+        correctCount++;
+        score += q.marks;
+      } else {
+        wrongCount++;
+        score -= q.negative_marks;
+      }
+    });
+
+    const finalScore = Math.max(0, parseFloat(score.toFixed(2)));
+    const attemptedCount = correctCount + wrongCount;
+    const accuracy = attemptedCount > 0 ? parseFloat(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
+
+    const result = {
+      score: finalScore,
+      maxScore,
+      accuracy,
+      correctCount,
+      wrongCount,
+      skippedCount,
+    };
+
+    setTestResult(result);
+    setCurrentScreen('test-result');
+
+    // Save Attempt to Supabase
+    if (user?.id) {
+      try {
+        await supabase.from('test_attempts').insert({
+          user_id: user.id,
+          paper_code: selectedPaperCode,
+          score: finalScore,
+          max_score: maxScore,
+          accuracy,
+          taken_at: new Date().toISOString(),
+        });
+      } catch (e) {}
+    }
   };
 
   const selectedPaperObj = GATE_PAPERS.find((p) => p.code === selectedPaperCode) || GATE_PAPERS[0];
   const currentSubjectsList = PAPER_SUBJECTS[selectedPaperCode] || PAPER_SUBJECTS['CE'];
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 border-4 border-[#1CA3DC] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Loading 3D GATE Engine...</p>
-      </div>
-    );
-  }
+  // Overall Syllabus Completion Calculation
+  const totalTopicsInPaper = currentSubjectsList.reduce((acc, sub) => acc + sub.checklist.length, 0);
+  const totalTopicsCompleted = currentSubjectsList.reduce((acc, sub) => {
+    return acc + sub.checklist.filter((item) => completedTopics[`${sub.id}_${item}`]).length;
+  }, 0);
+  const overallPercentage = totalTopicsInPaper > 0 ? Math.round((totalTopicsCompleted / totalTopicsInPaper) * 100) : 0;
 
   return (
     <div
@@ -714,25 +807,26 @@ export default function Gate3DApp() {
         themeMode === 'dark' ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-100 text-slate-900'
       }`}
     >
-      {/* 3D Floating Background Parallax Spheres */}
+      {/* Canvas Layer for 🎉 Confetti Animation */}
+      <canvas ref={confettiCanvasRef} className="fixed inset-0 pointer-events-none z-50" />
+
+      {/* 3D Floating Background Spheres */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-purple-600/20 blur-3xl animate-pulse" />
         <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl animate-pulse delay-700" />
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl animate-pulse delay-1000" />
       </div>
 
-      {/* Persistent 3D Glass Header Navbar */}
+      {/* Persistent 3D Header Navbar */}
       <header
         className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-all ${
-          themeMode === 'dark'
-            ? 'bg-slate-950/80 border-slate-800/80 text-white'
-            : 'bg-white/80 border-slate-200 text-slate-900 shadow-sm'
+          themeMode === 'dark' ? 'bg-slate-950/80 border-slate-800/80 text-white' : 'bg-white/80 border-slate-200 text-slate-900 shadow-sm'
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => user && setCurrentScreen('paper-select')}>
+            {/* Brand Logo */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => user && setCurrentScreen('dashboard')}>
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-cyan-500/20 border border-white/20 style-3d hover:scale-105 transition-all">
                 3D
               </div>
@@ -740,29 +834,27 @@ export default function Gate3DApp() {
                 <div className="text-base font-black tracking-tight flex items-center gap-1.5">
                   <span>GATE Prep Hub</span>
                   <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-extrabold uppercase">
-                    3D Edition
+                    3D Pro
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-medium">Powered by Supabase OTP Auth</div>
+                <div className="text-[10px] text-slate-400 font-medium">Supabase OTP + Interactive Engine</div>
               </div>
             </div>
 
             {/* Right Controls */}
             <div className="flex items-center gap-3">
-              {/* Light / Dark Mode Toggle */}
+              {/* Theme Toggle */}
               <button
                 onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
                 className={`p-2 rounded-xl border transition-all ${
-                  themeMode === 'dark'
-                    ? 'bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800'
-                    : 'bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300'
+                  themeMode === 'dark' ? 'bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800' : 'bg-slate-200 border-slate-300 text-slate-700 hover:bg-slate-300'
                 }`}
                 aria-label="Toggle Theme"
               >
                 {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
 
-              {/* Logged in User Bar */}
+              {/* Logged in User Badge & Logout */}
               {user && (
                 <div className="flex items-center gap-2">
                   <div
@@ -790,7 +882,7 @@ export default function Gate3DApp() {
         </div>
       </header>
 
-      {/* Main Content Area with 3D Slide Entrance */}
+      {/* Main Content Area */}
       <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
         {/* STEP 1 — 🔐 LOGIN SCREEN */}
@@ -802,17 +894,15 @@ export default function Gate3DApp() {
                   themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/90 border-slate-200'
                 }`}
               >
-                {/* 3D Floating Top Accent */}
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center mx-auto text-white shadow-lg shadow-cyan-500/30 border border-white/20 style-3d">
                   <Shield className="w-7 h-7" />
                 </div>
 
                 <div className="text-center space-y-2">
                   <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Supabase 3D Auth Portal</h1>
-                  <p className="text-xs text-slate-400">Enter your email to receive a passwordless 6-digit OTP code.</p>
+                  <p className="text-xs text-slate-400">Enter your email for a passwordless 6-digit OTP code.</p>
                 </div>
 
-                {/* Feedback Banners */}
                 {authError && (
                   <div className="p-3.5 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-semibold flex items-start gap-2.5">
                     <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
@@ -827,7 +917,6 @@ export default function Gate3DApp() {
                   </div>
                 )}
 
-                {/* STEP 1A: EMAIL INPUT FORM */}
                 {otpStep === 'email' && (
                   <form onSubmit={handleSendOtp} className="space-y-4">
                     <div>
@@ -839,13 +928,11 @@ export default function Gate3DApp() {
                         <input
                           type="email"
                           required
-                          placeholder="gate.aspirant@iit.ac.in"
+                          placeholder="student@iit.ac.in"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className={`w-full text-xs font-semibold pl-10 pr-4 py-3 rounded-2xl border focus:outline-none focus:border-[#1CA3DC] transition-all ${
-                            themeMode === 'dark'
-                              ? 'bg-slate-950 border-slate-800 text-white placeholder:text-slate-600'
-                              : 'bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400'
+                            themeMode === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                           }`}
                         />
                       </div>
@@ -854,7 +941,7 @@ export default function Gate3DApp() {
                     <button
                       type="submit"
                       disabled={otpLoading}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 active:translate-y-0.5 active:shadow-inner transition-all disabled:opacity-50"
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:translate-y-0.5 transition-all disabled:opacity-50"
                     >
                       {otpLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -868,7 +955,6 @@ export default function Gate3DApp() {
                   </form>
                 )}
 
-                {/* STEP 1B: 6-DIGIT 3D OTP BOXES */}
                 {otpStep === 'verify' && (
                   <form onSubmit={handleVerifyOtp} className="space-y-6">
                     <div className="space-y-2">
@@ -876,16 +962,11 @@ export default function Gate3DApp() {
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
                           Enter 6-Digit OTP
                         </label>
-                        <button
-                          type="button"
-                          onClick={() => setOtpStep('email')}
-                          className="text-[11px] font-bold text-cyan-400 hover:underline"
-                        >
+                        <button type="button" onClick={() => setOtpStep('email')} className="text-[11px] font-bold text-cyan-400 hover:underline">
                           Change Email
                         </button>
                       </div>
 
-                      {/* 6 3D Pop Boxes */}
                       <div className="flex items-center justify-between gap-2">
                         {otpDigits.map((digit, idx) => (
                           <input
@@ -899,11 +980,9 @@ export default function Gate3DApp() {
                             value={digit}
                             onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                             onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                            className={`w-11 h-13 sm:w-12 sm:h-14 text-center font-mono font-black text-lg sm:text-xl rounded-2xl border transition-all duration-150 transform focus:scale-110 focus:border-[#1CA3DC] focus:shadow-lg focus:shadow-cyan-500/30 focus:outline-none ${
+                            className={`w-11 h-13 sm:w-12 sm:h-14 text-center font-mono font-black text-lg sm:text-xl rounded-2xl border transition-all duration-150 transform focus:scale-110 focus:border-[#1CA3DC] ${
                               digit ? 'border-cyan-400 bg-cyan-500/10 text-cyan-300 scale-105' : ''
-                            } ${
-                              themeMode === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                            }`}
+                            } ${themeMode === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'}`}
                           />
                         ))}
                       </div>
@@ -912,7 +991,7 @@ export default function Gate3DApp() {
                     <button
                       type="submit"
                       disabled={otpLoading}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 active:translate-y-0.5 transition-all disabled:opacity-50"
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
                     >
                       {otpLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -924,19 +1003,13 @@ export default function Gate3DApp() {
                       )}
                     </button>
 
-                    {/* Resend OTP Button with 60s Countdown */}
                     <div className="text-center">
                       {resendTimer > 0 ? (
                         <p className="text-xs text-slate-400 font-medium">
                           Resend code available in <strong className="text-cyan-400 font-mono">{resendTimer}s</strong>
                         </p>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={handleSendOtp}
-                          disabled={otpLoading}
-                          className="text-xs font-bold text-cyan-400 hover:underline inline-flex items-center gap-1"
-                        >
+                        <button type="button" onClick={handleSendOtp} disabled={otpLoading} className="text-xs font-bold text-cyan-400 hover:underline flex items-center justify-center gap-1 mx-auto">
                           <RefreshCw className="w-3.5 h-3.5" />
                           <span>Resend OTP Code</span>
                         </button>
@@ -949,16 +1022,163 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* STEP 2 — 📄 PAPER SELECTION PAGE */}
+        {/* STEP 2 — 📊 DASHBOARD PAGE */}
+        {currentScreen === 'dashboard' && (
+          <div className="space-y-8 animate-fade-rise">
+            {/* Top Welcome Banner & Days-Left Countdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Welcome Card */}
+              <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl space-y-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>GATE 2027 Preparation Portal</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                    Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{user?.email?.split('@')[0] || 'Aspirant'}</span>!
+                  </h1>
+                  <p className="text-slate-300 text-xs sm:text-sm">
+                    Target Paper: <strong className="text-cyan-300 font-mono">{selectedPaperObj.name} ({selectedPaperCode})</strong>
+                  </p>
+                </div>
+
+                {/* Quick Action Navigation Buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    onClick={() => setCurrentScreen('subjects')}
+                    className="px-4 py-2.5 rounded-xl bg-[#1CA3DC] hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Browse {selectedPaperCode} Subjects</span>
+                  </button>
+
+                  <button
+                    onClick={startMockQuiz}
+                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+                  >
+                    <Trophy className="w-4 h-4 text-amber-300" />
+                    <span>Take GATE Mock Test</span>
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentScreen('paper-select')}
+                    className="px-3.5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <span>Change Paper</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Countdown & Progress Ring Card */}
+              <div className="bg-slate-900/90 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl flex flex-col justify-between space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Exam Target</div>
+                    <div className="text-sm font-bold text-white">Feb 6, 2027</div>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-sm font-black flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span>{daysLeft} Days</span>
+                  </div>
+                </div>
+
+                {/* Overall Syllabus Progress Ring */}
+                <div className="flex items-center gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                  <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
+                    <svg className="w-14 h-14 transform -rotate-90">
+                      <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-slate-800" fill="transparent" />
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="22"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeDasharray={138}
+                        strokeDashoffset={138 - (138 * overallPercentage) / 100}
+                        strokeLinecap="round"
+                        className="text-cyan-400 transition-all duration-1000"
+                        fill="transparent"
+                      />
+                    </svg>
+                    <span className="absolute text-xs font-black text-cyan-300 font-mono">{overallPercentage}%</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="text-xs font-bold text-white">Overall Syllabus Progress</div>
+                    <div className="text-[11px] text-slate-400">
+                      {totalTopicsCompleted} of {totalTopicsInPaper} topics completed
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly Study Streak Tracker & Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Weekly Streak Card */}
+              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                    <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <span>Weekly Study Streak</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/40">
+                    3 Days Active
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-7 gap-2 text-center">
+                  {[
+                    { day: 'M', active: true },
+                    { day: 'T', active: true },
+                    { day: 'W', active: true },
+                    { day: 'T', active: false },
+                    { day: 'F', active: false },
+                    { day: 'S', active: false },
+                    { day: 'S', active: false },
+                  ].map((d, i) => (
+                    <div key={i} className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 ${d.active ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-600'}`}>
+                      <Flame className={`w-4 h-4 ${d.active ? 'text-amber-400' : 'text-slate-700'}`} />
+                      <span className="text-[10px] font-bold">{d.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Topics Done Stat */}
+              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                  <CheckSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white font-mono">{totalTopicsCompleted}</div>
+                  <div className="text-xs text-slate-400 font-semibold">Topics Mastered</div>
+                </div>
+              </div>
+
+              {/* Mock Tests Taken Stat */}
+              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-white font-mono">{testResult ? 1 : 0}</div>
+                  <div className="text-xs text-slate-400 font-semibold">Mock Tests Completed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3 — 📄 PAPER SELECTION PAGE */}
         {currentScreen === 'paper-select' && (
           <div className="space-y-8 animate-fade-rise">
-            {/* Header Greeting */}
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>Supabase Authenticated Session</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
                 Hi, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{user?.email?.split('@')[0] || 'Aspirant'}</span>! Choose your GATE Paper
               </h1>
               <p className="text-xs sm:text-sm text-slate-400">
@@ -966,7 +1186,6 @@ export default function Gate3DApp() {
               </p>
             </div>
 
-            {/* 3D Paper Tilt Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {GATE_PAPERS.map((paper) => {
                 const Icon = paper.icon;
@@ -978,9 +1197,7 @@ export default function Gate3DApp() {
                       className={`p-6 sm:p-7 rounded-3xl border backdrop-blur-xl shadow-xl transition-all h-full flex flex-col justify-between space-y-6 group ${
                         isSelected
                           ? 'border-cyan-400 bg-cyan-950/30 shadow-cyan-500/20 ring-2 ring-cyan-500/50'
-                          : themeMode === 'dark'
-                          ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
-                          : 'bg-white/90 border-slate-200 hover:border-slate-300'
+                          : themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700' : 'bg-white/90 border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       <div className="space-y-4">
@@ -988,18 +1205,14 @@ export default function Gate3DApp() {
                           <span className="px-3 py-1 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] font-extrabold font-mono text-cyan-300">
                             PAPER CODE: {paper.code}
                           </span>
-                          <div
-                            className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${paper.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform style-3d`}
-                          >
+                          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${paper.color} flex items-center justify-center text-white shadow-lg style-3d`}>
                             <Icon className="w-6 h-6" />
                           </div>
                         </div>
 
                         <div>
                           <h3 className="text-xl font-black tracking-tight">{paper.name}</h3>
-                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                            {paper.category}
-                          </div>
+                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{paper.category}</div>
                         </div>
 
                         <p className="text-xs text-slate-400 leading-relaxed">{paper.desc}</p>
@@ -1024,13 +1237,12 @@ export default function Gate3DApp() {
           </div>
         )}
 
-        {/* STEP 3 — 📚 SUBJECTS PAGE (DYNAMIC) */}
+        {/* STEP 4 — 📚 SUBJECTS PAGE (DYNAMIC) */}
         {currentScreen === 'subjects' && (
           <div className="space-y-8 animate-fade-rise">
-            {/* Breadcrumb Navigation */}
             <div className="flex items-center justify-between">
               <nav className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <button onClick={() => setCurrentScreen('paper-select')} className="hover:text-cyan-400 transition-colors">
+                <button onClick={() => setCurrentScreen('dashboard')} className="hover:text-cyan-400 transition-colors">
                   Home
                 </button>
                 <span>&gt;</span>
@@ -1048,7 +1260,6 @@ export default function Gate3DApp() {
               </button>
             </div>
 
-            {/* Header Title Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold mb-1">
@@ -1058,7 +1269,7 @@ export default function Gate3DApp() {
                   {selectedPaperObj.name} ({selectedPaperCode}) Core Subjects
                 </h1>
                 <p className="text-xs text-slate-300">
-                  Select a subject below to view topic notes, GATE weightage breakdown, and preparation checklists.
+                  Select a subject below to view topic notes, GATE weightage breakdown, and topic checklists.
                 </p>
               </div>
 
@@ -1068,80 +1279,80 @@ export default function Gate3DApp() {
               </div>
             </div>
 
-            {/* 3D Subjects Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentSubjectsList.map((subject) => (
-                <Tilt3DCard
-                  key={subject.id}
-                  onClick={() => {
-                    setSelectedSubject(subject);
-                    setCurrentScreen('subject-detail');
-                  }}
-                  maxTilt={12}
-                >
-                  <div
-                    className={`p-6 rounded-3xl border backdrop-blur-xl shadow-xl transition-all h-full flex flex-col justify-between space-y-6 group ${
-                      themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800 hover:border-cyan-500/60' : 'bg-white/90 border-slate-200 hover:border-cyan-500/60'
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black font-mono">
-                          {subject.weightage}
-                        </span>
+              {currentSubjectsList.map((subject) => {
+                const completedCount = subject.checklist.filter((item) => completedTopics[`${subject.id}_${item}`]).length;
+                const subPercent = Math.round((completedCount / subject.checklist.length) * 100);
 
-                        {/* Animated SVG Progress Ring */}
-                        <div className="relative w-10 h-10 flex items-center justify-center">
-                          <svg className="w-10 h-10 transform -rotate-90">
-                            <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" className="text-slate-800" fill="transparent" />
-                            <circle
-                              cx="20"
-                              cy="20"
-                              r="16"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              strokeDasharray={100}
-                              strokeDashoffset={100 - subject.weightagePercent}
-                              strokeLinecap="round"
-                              className="text-cyan-400 transition-all duration-1000"
-                              fill="transparent"
-                            />
-                          </svg>
-                          <span className="absolute text-[10px] font-black text-cyan-300 font-mono">
-                            {subject.weightagePercent}%
+                return (
+                  <Tilt3DCard
+                    key={subject.id}
+                    onClick={() => {
+                      setSelectedSubject(subject);
+                      setCurrentScreen('subject-detail');
+                    }}
+                    maxTilt={12}
+                  >
+                    <div
+                      className={`p-6 rounded-3xl border backdrop-blur-xl shadow-xl transition-all h-full flex flex-col justify-between space-y-6 group ${
+                        themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800 hover:border-cyan-500/60' : 'bg-white/90 border-slate-200 hover:border-cyan-500/60'
+                      }`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black font-mono">
+                            {subject.weightage}
                           </span>
+
+                          <div className="relative w-10 h-10 flex items-center justify-center">
+                            <svg className="w-10 h-10 transform -rotate-90">
+                              <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" className="text-slate-800" fill="transparent" />
+                              <circle
+                                cx="20"
+                                cy="20"
+                                r="16"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeDasharray={100}
+                                strokeDashoffset={100 - subPercent}
+                                strokeLinecap="round"
+                                className="text-cyan-400 transition-all duration-1000"
+                                fill="transparent"
+                              />
+                            </svg>
+                            <span className="absolute text-[10px] font-black text-cyan-300 font-mono">{subPercent}%</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-black tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+                            {subject.name}
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1 leading-relaxed">{subject.desc}</p>
                         </div>
                       </div>
 
-                      <div>
-                        <h3 className="text-lg font-black tracking-tight text-white group-hover:text-cyan-300 transition-colors">
-                          {subject.name}
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{subject.desc}</p>
+                      <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between">
+                        <span className="text-xs text-slate-400 font-semibold">{completedCount} / {subject.checklist.length} Done</span>
+                        <button className="px-3.5 py-2 rounded-xl bg-[#1CA3DC] group-hover:bg-cyan-400 text-slate-950 font-extrabold text-xs flex items-center gap-1 shadow-md active:scale-95 transition-all">
+                          <span>Start Studying</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-
-                    <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between">
-                      <span className="text-xs text-slate-400 font-semibold">{subject.checklist.length} Topic Checklists</span>
-                      <button className="px-3.5 py-2 rounded-xl bg-[#1CA3DC] group-hover:bg-cyan-400 text-slate-950 font-extrabold text-xs flex items-center gap-1 shadow-md shadow-cyan-500/20 active:scale-95 transition-all">
-                        <span>Start Studying</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </Tilt3DCard>
-              ))}
+                  </Tilt3DCard>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* STEP 4 — 📖 SUBJECT DETAILS PAGE */}
+        {/* STEP 5 — 📖 SUBJECT DETAILS & PERSONAL NOTES PAGE */}
         {currentScreen === 'subject-detail' && selectedSubject && (
           <div className="space-y-8 animate-fade-rise">
-            {/* Breadcrumb Navigation */}
             <div className="flex items-center justify-between">
               <nav className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <button onClick={() => setCurrentScreen('paper-select')} className="hover:text-cyan-400 transition-colors">
+                <button onClick={() => setCurrentScreen('dashboard')} className="hover:text-cyan-400 transition-colors">
                   Home
                 </button>
                 <span>&gt;</span>
@@ -1161,14 +1372,10 @@ export default function Gate3DApp() {
               </button>
             </div>
 
-            {/* Subject Detail Header */}
             <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl space-y-4">
               <div className="flex items-center gap-3">
                 <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs font-extrabold">
                   {selectedSubject.weightage} GATE Weightage
-                </span>
-                <span className="px-3 py-1 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono text-xs font-extrabold">
-                  {selectedSubject.notesCount} Curated Modules
                 </span>
               </div>
 
@@ -1176,16 +1383,87 @@ export default function Gate3DApp() {
               <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-3xl">{selectedSubject.desc}</p>
             </div>
 
-            {/* Content Columns: Resources & Checklist */}
+            {/* Checklist & Personal Notes Editor */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left 2 Columns: Study Resources */}
+              {/* Checklist & Topic Notes */}
               <div className="lg:col-span-2 space-y-6">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-cyan-400" />
-                  <span>Notes &amp; Learning Resources</span>
+                  <CheckSquare className="w-5 h-5 text-emerald-400" />
+                  <span>Topic Progress &amp; Personal Notes</span>
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  {selectedSubject.checklist.map((topic, idx) => {
+                    const topicKey = `${selectedSubject.id}_${topic}`;
+                    const isDone = !!completedTopics[topicKey];
+                    const isNoteActive = activeTopicNoteId === topicKey;
+                    const noteText = topicNotes[topicKey] || '';
+
+                    return (
+                      <div key={idx} className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
+                        <div className="flex items-center justify-between">
+                          <div
+                            onClick={() => toggleTopicCompletion(selectedSubject.id, topic)}
+                            className="flex items-center gap-3 cursor-pointer group"
+                          >
+                            {isDone ? (
+                              <CheckSquare className="w-5 h-5 text-emerald-400 shrink-0" />
+                            ) : (
+                              <Square className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 shrink-0 transition-colors" />
+                            )}
+                            <span className={`text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}`}>{topic}</span>
+                          </div>
+
+                          <button
+                            onClick={() => setActiveTopicNoteId(isNoteActive ? null : topicKey)}
+                            className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
+                              isNoteActive
+                                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                            }`}
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>{noteText ? 'Edit Notes' : 'Add Note'}</span>
+                          </button>
+                        </div>
+
+                        {/* Note Editor Drawer */}
+                        {isNoteActive && (
+                          <div className="pt-3 border-t border-slate-800 space-y-3">
+                            <textarea
+                              rows={3}
+                              placeholder="Write key formulas, important concepts, or solved PYQ notes..."
+                              value={noteText}
+                              onChange={(e) => setTopicNotes({ ...topicNotes, [topicKey]: e.target.value })}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                            />
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-slate-500 font-medium">Synced with Supabase Cloud</span>
+                              <button
+                                onClick={() => handleSaveTopicNote(topicKey, noteText)}
+                                disabled={savingNote}
+                                className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md"
+                              >
+                                {savingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                <span>Save Note</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Resource Links Side Card */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-cyan-400" />
+                  <span>Syllabus &amp; Lectures</span>
+                </h3>
+
+                <div className="space-y-4">
                   <a
                     href="https://gate2026.iitg.ac.in/doc/GATE2026_Syllabus/CE_2026_Syllabus.pdf"
                     target="_blank"
@@ -1197,7 +1475,7 @@ export default function Gate3DApp() {
                     </div>
                     <div className="space-y-1">
                       <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">Official Syllabus PDF</h4>
-                      <p className="text-xs text-slate-400">Complete section topic breakdown published by organizing institute.</p>
+                      <p className="text-xs text-slate-400">Complete topic breakdown from IIT Madras.</p>
                     </div>
                   </a>
 
@@ -1211,70 +1489,142 @@ export default function Gate3DApp() {
                       <Video className="w-5 h-5" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">NPTEL Video Lectures</h4>
-                      <p className="text-xs text-slate-400">Free video courses & solved PYQ walkthroughs by IIT faculty.</p>
+                      <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">NPTEL GATE Videos</h4>
+                      <p className="text-xs text-slate-400">Free video lectures & PYQ solutions.</p>
                     </div>
                   </a>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
-                  <h4 className="text-sm font-bold text-amber-400 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    <span>Topper Strategy Note</span>
-                  </h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Master formulas, standard derivations, and solved PYQs from the last 15 years. Re-solve previous GATE problems twice before attempting full-length mock exams.
+        {/* STEP 6 — 📝 MOCK TEST SIMULATOR */}
+        {currentScreen === 'mock-test' && quizQuestions[currentQuestionIndex] && (
+          <div className="max-w-4xl mx-auto space-y-8 animate-fade-rise">
+            {/* Exam Top Status Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 p-5 rounded-3xl border border-slate-800 shadow-xl">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">GATE Test Simulator</div>
+                <h2 className="text-lg font-black text-white">{selectedPaperCode} Paper Practice Exam</h2>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Timer Badge */}
+                <div className="px-4 py-2 rounded-2xl bg-slate-950 border border-slate-800 text-amber-300 font-mono text-sm font-black flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>
+                    {Math.floor(quizTimer / 60)}:{(quizTimer % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleFinishQuiz}
+                  className="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg active:scale-95 transition-all"
+                >
+                  Submit Exam
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Question Card */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-6 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
+                      Question {currentQuestionIndex + 1} of {quizQuestions.length}
+                    </span>
+                    <span className="text-xs text-slate-400 font-semibold">
+                      Marks: <strong className="text-white">{quizQuestions[currentQuestionIndex].marks}</strong> | Neg:{' '}
+                      <strong className="text-red-400">-{quizQuestions[currentQuestionIndex].negative_marks}</strong>
+                    </span>
+                  </div>
+
+                  <p className="text-base font-bold text-white leading-relaxed">
+                    {quizQuestions[currentQuestionIndex].question}
                   </p>
+
+                  {/* Options */}
+                  <div className="space-y-3">
+                    {quizQuestions[currentQuestionIndex].options.map((opt, oIdx) => {
+                      const isSelected = userAnswers[currentQuestionIndex] === oIdx;
+                      return (
+                        <div
+                          key={oIdx}
+                          onClick={() => handleSelectQuizOption(oIdx)}
+                          className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                            isSelected
+                              ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-lg shadow-cyan-500/20'
+                              : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                          }`}
+                        >
+                          <span className="text-xs font-semibold">{opt}</span>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-cyan-400" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Question Controls */}
+                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                    <button
+                      onClick={toggleMarkForReview}
+                      className={`px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
+                        markedForReview[currentQuestionIndex]
+                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                          : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>{markedForReview[currentQuestionIndex] ? 'Marked for Review' : 'Mark for Review'}</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {currentQuestionIndex > 0 && (
+                        <button
+                          onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
+                          className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold"
+                        >
+                          Previous
+                        </button>
+                      )}
+                      {currentQuestionIndex < quizQuestions.length - 1 && (
+                        <button
+                          onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                          className="px-4 py-2 rounded-xl bg-[#1CA3DC] text-slate-950 font-bold text-xs"
+                        >
+                          Next Question
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: 3D Interactive Study Checklist */}
+              {/* Question Palette Grid */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <CheckSquare className="w-5 h-5 text-emerald-400" />
-                  <span>Topic Checklist</span>
-                </h3>
-
                 <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
-                  {/* Progress Bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-slate-400">Completion</span>
-                      <span className="text-cyan-400 font-mono">
-                        {selectedSubject.checklist.filter((item) => completedTasks[`${selectedSubject.id}_${item}`]).length} / {selectedSubject.checklist.length}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-emerald-400 transition-all duration-300"
-                        style={{
-                          width: `${
-                            (selectedSubject.checklist.filter((item) => completedTasks[`${selectedSubject.id}_${item}`]).length /
-                              selectedSubject.checklist.length) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Question Palette</h4>
+                  <div className="grid grid-cols-4 gap-2.5">
+                    {quizQuestions.map((_, idx) => {
+                      const isAns = userAnswers[idx] !== undefined;
+                      const isReview = markedForReview[idx];
+                      const isCurrent = idx === currentQuestionIndex;
 
-                  {/* Checklist Items */}
-                  <div className="space-y-2.5 pt-2">
-                    {selectedSubject.checklist.map((topic, idx) => {
-                      const taskId = `${selectedSubject.id}_${topic}`;
-                      const isDone = !!completedTasks[taskId];
+                      let btnColor = 'bg-slate-950 border-slate-800 text-slate-400';
+                      if (isAns) btnColor = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-bold';
+                      if (isReview) btnColor = 'bg-purple-500/20 border-purple-500/40 text-purple-300 font-bold';
+                      if (isCurrent) btnColor += ' ring-2 ring-cyan-400';
 
                       return (
-                        <div
+                        <button
                           key={idx}
-                          onClick={() => toggleChecklist(taskId)}
-                          className={`p-3 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 ${
-                            isDone ? 'bg-emerald-950/30 border-emerald-500/40 text-slate-400 line-through' : 'bg-slate-950 border-slate-800 text-white hover:border-slate-700'
-                          }`}
+                          onClick={() => setCurrentQuestionIndex(idx)}
+                          className={`p-3 rounded-xl border text-xs font-mono transition-all ${btnColor}`}
                         >
-                          {isDone ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-slate-600 shrink-0" />}
-                          <span className="text-xs font-semibold">{topic}</span>
-                        </div>
+                          {idx + 1}
+                        </button>
                       );
                     })}
                   </div>
@@ -1283,15 +1633,66 @@ export default function Gate3DApp() {
             </div>
           </div>
         )}
+
+        {/* STEP 7 — 📈 TEST RESULTS SCREEN */}
+        {currentScreen === 'test-result' && testResult && (
+          <div className="max-w-3xl mx-auto space-y-8 animate-fade-rise">
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl text-center space-y-6">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center mx-auto text-white shadow-xl shadow-cyan-500/30 border border-white/20 style-3d">
+                <Trophy className="w-8 h-8 text-amber-300" />
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-3xl font-black text-white">GATE Mock Test Performance Summary</h1>
+                <p className="text-xs text-slate-300">Attempt saved to Supabase Cloud Database.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Final Score</div>
+                  <div className="text-3xl font-black text-cyan-400 font-mono mt-1">
+                    {testResult.score} <span className="text-xs text-slate-400 font-normal">/ {testResult.maxScore}</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Accuracy</div>
+                  <div className="text-3xl font-black text-emerald-400 font-mono mt-1">{testResult.accuracy}%</div>
+                </div>
+
+                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">Correct / Wrong</div>
+                  <div className="text-xl font-black text-white font-mono mt-2">
+                    <span className="text-emerald-400">{testResult.correctCount}</span> / <span className="text-red-400">{testResult.wrongCount}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center gap-3 pt-4">
+                <button
+                  onClick={startMockQuiz}
+                  className="px-4 py-2.5 rounded-xl bg-[#1CA3DC] text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Retake Test</span>
+                </button>
+                <button
+                  onClick={() => setCurrentScreen('dashboard')}
+                  className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-bold text-xs"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* Global CSS for 3D animations */}
       <style jsx global>{`
         .style-3d {
           transform-style: preserve-3d;
           backface-visibility: hidden;
         }
-
         @keyframes fadeRise {
           from {
             opacity: 0;
@@ -1302,7 +1703,6 @@ export default function Gate3DApp() {
             transform: translateY(0) scale(1);
           }
         }
-
         .animate-fade-rise {
           animation: fadeRise 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
