@@ -1,11 +1,11 @@
-import GateCivilGuide from '@/components/GateCivilGuide';
+import Gate3DApp from '@/components/Gate3DApp';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'GATE Civil Engineering (CE) 2027 — Complete Guide, Cutoffs & Study Plan',
-  description: 'Complete guide for GATE Civil Engineering 2027 aspirants. Eligibility criteria, 4-year cutoff trends, M.Tech Structural Engineering guide, resource library, and 70-day study plan.',
+  title: '3D GATE Preparation Hub — Supabase Email OTP & Interactive 3D Papers',
+  description: 'Modern 3D GATE preparation web application. Supabase Email OTP authentication, 3D flip tilt cards for Civil (CE), Biotechnology (BT), Computer Science (CS), Electrical (EE), Mechanical (ME), dynamic subjects & study checklists.',
 };
 
 export default function Home() {
-  return <GateCivilGuide />;
+  return <Gate3DApp />;
 }

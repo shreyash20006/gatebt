@@ -17,7 +17,7 @@ interface AppLayoutClientProps {
 
 export default function AppLayoutClient({ children }: AppLayoutClientProps) {
   const pathname = usePathname();
-  const isFullWidthPage = pathname === '/' || pathname === '/gate-ce';
+  const isFullWidthPage = pathname === '/' || pathname === '/gate-ce' || pathname === '/gate-3d';
 
   return (
     <AuthProvider>
