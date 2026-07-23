@@ -1,5 +1,6 @@
 -- ========================================================
--- GATE 3D PREP WEB APP - SUPABASE DATABASE SCHEMA & RLS
+-- GATE 3D PREP WEB APP - COMPLETE SUPABASE DATABASE SCHEMA
+-- PROMPTS 1, 2 & 3 COMBINED
 -- ========================================================
 
 -- 1. USER PROFILES TABLE
@@ -8,12 +9,13 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     full_name TEXT,
     selected_paper VARCHAR(10) DEFAULT 'CE',
     last_subject_id TEXT,
+    daily_goal_hours NUMERIC(3,1) DEFAULT 4.0,
+    target_score INT DEFAULT 700,
     streak_days JSONB DEFAULT '{"mon": true, "tue": true, "wed": true, "thu": false, "fri": false, "sat": false, "sun": false}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS for user_profiles
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own profile" ON public.user_profiles
@@ -44,7 +46,7 @@ CREATE POLICY "Allow public read access to subjects" ON public.subjects
     FOR SELECT USING (true);
 
 
--- 3. TOPICS TABLE (User-specific completion tracking)
+-- 3. TOPICS TABLE
 CREATE TABLE IF NOT EXISTS public.topics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     subject_id TEXT NOT NULL,
@@ -86,8 +88,8 @@ CREATE TABLE IF NOT EXISTS public.questions (
     paper_code VARCHAR(10) NOT NULL,
     subject TEXT NOT NULL,
     question TEXT NOT NULL,
-    options JSONB NOT NULL, -- e.g. ["Option A", "Option B", "Option C", "Option D"]
-    correct_answer INT NOT NULL, -- 0-based index of correct option
+    options JSONB NOT NULL,
+    correct_answer INT NOT NULL,
     marks INT NOT NULL DEFAULT 1,
     negative_marks NUMERIC(4,2) NOT NULL DEFAULT 0.33,
     explanation TEXT
@@ -117,11 +119,41 @@ CREATE POLICY "Users can manage own test attempts" ON public.test_attempts
     FOR ALL USING (auth.uid() = user_id);
 
 
+-- 7. STUDY SESSIONS TABLE (PROMPT 3: Analytics Time Tracking)
+CREATE TABLE IF NOT EXISTS public.study_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    subject_id TEXT NOT NULL,
+    minutes INT NOT NULL DEFAULT 0,
+    session_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.study_sessions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own study sessions" ON public.study_sessions
+    FOR ALL USING (auth.uid() = user_id);
+
+
+-- 8. USER GOALS & REMINDERS TABLE (PROMPT 3: Daily Goals)
+CREATE TABLE IF NOT EXISTS public.user_goals (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    daily_hours_target NUMERIC(3,1) DEFAULT 4.0,
+    target_gate_score INT DEFAULT 700,
+    notifications_enabled BOOLEAN DEFAULT FALSE,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.user_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own goals" ON public.user_goals
+    FOR ALL USING (auth.uid() = user_id);
+
+
 -- ========================================================
--- SEED DATA (CE & BT SUBJECTS & MOCK QUESTIONS)
+-- SEED DATA
 -- ========================================================
 
--- Seed Subjects
 INSERT INTO public.subjects (id, paper_code, subject_name, weightage, weightage_percent, icon_name, description)
 VALUES
 ('ce-structural', 'CE', 'Structural Engineering', '20–25%', 25, 'Building2', 'Engineering Mechanics, SOM, Structural Analysis, RCC & Steel Structures.'),
@@ -132,18 +164,13 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
--- Seed Questions
 INSERT INTO public.questions (paper_code, subject, question, options, correct_answer, marks, negative_marks, explanation)
 VALUES
-('CE', 'Structural Engineering', 'What is the maximum shear stress in a circular shaft subjected to torque T and diameter D?', '["16T / (π D³)", "32T / (π D³)", "8T / (π D³)", "64T / (π D³)"]'::jsonb, 0, 1, 0.33, 'The maximum shear stress τ_max in a circular shaft under torsion is given by τ = 16T / (π D³).'),
+('CE', 'Structural Engineering', 'What is the maximum shear stress in a circular shaft subjected to torque T and diameter D?', '["16T / (π D³)", "32T / (π D³)", "8T / (π D³)", "64T / (π D³)"]'::jsonb, 0, 1, 0.33, 'The maximum shear stress τ_max in a circular solid shaft under torsion is given by τ = 16T / (π D³).'),
 
 ('CE', 'Structural Engineering', 'In a simply supported beam of span L with a central point load W, the maximum bending moment is:', '["W L / 8", "W L / 4", "W L / 2", "W L"]'::jsonb, 1, 2, 0.67, 'Maximum bending moment occurs at center and equals W L / 4.'),
 
 ('CE', 'Geotechnical Engineering', 'According to Terzaghi, the ultimate bearing capacity for a continuous strip footing is:', '["c N_c + q N_q + 0.5 γ B N_γ", "1.3 c N_c + q N_q + 0.4 γ B N_γ", "c N_c + q N_q + 0.3 γ B N_γ", "1.3 c N_c + q N_q + 0.3 γ B N_γ"]'::jsonb, 0, 1, 0.33, 'Terzaghi ultimate bearing capacity equation for strip footing: q_u = c N_c + q N_q + 0.5 γ B N_γ.'),
 
-('CE', 'Water Resources Engineering', 'The Froude number F_r for open channel flow is defined as:', '["V / √(g y)", "V / (g y)", "V² / (g y)", "√(V / g y)"]'::jsonb, 0, 1, 0.33, 'Froude number F_r = V / √(g y), representing ratio of inertial to gravitational forces.'),
-
-('BT', 'Biochemistry', 'The Km value of an enzyme represents:', '["Substrate concentration at Vmax", "Substrate concentration at half Vmax", "Maximum reaction velocity", "Enzyme concentration"]'::jsonb, 1, 1, 0.33, 'Michaelis constant Km equals the substrate concentration at which reaction rate is half of Vmax.'),
-
-('BT', 'Bioprocess Engineering', 'In a CSTR bioprocess, cell dilution rate D is defined as:', '["V / F", "F / V", "F × V", "μ / V"]'::jsonb, 1, 2, 0.67, 'Dilution rate D = Volumetric Flow Rate (F) / Reactor Volume (V).')
+('BT', 'Biochemistry', 'The Km value of an enzyme represents:', '["Substrate concentration at Vmax", "Substrate concentration at half Vmax", "Maximum reaction velocity", "Enzyme concentration"]'::jsonb, 1, 1, 0.33, 'Michaelis constant Km equals the substrate concentration at which reaction rate is half of Vmax.')
 ON CONFLICT DO NOTHING;
