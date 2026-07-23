@@ -704,95 +704,7 @@ export default function Gate3DApp() {
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl animate-pulse delay-1000" />
       </div>
 
-      {/* Header Navigation */}
-      <header
-        className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-all ${
-          themeMode === 'dark' ? 'bg-slate-950/80 border-slate-800/80 text-white' : 'bg-white/80 border-slate-200 text-slate-900 shadow-sm'
-        }`}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen('dashboard')}>
-              <Logo size="md" />
-              <div className="hidden sm:block">
-                <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-extrabold uppercase">
-                  3D Pro
-                </span>
-              </div>
-            </div>
 
-            {/* Navigation Tabs */}
-            <div className="hidden md:flex items-center gap-1 text-xs font-bold">
-              <button
-                onClick={() => setCurrentScreen('dashboard')}
-                className={`px-3 py-1.5 rounded-xl transition-all ${
-                  currentScreen === 'dashboard' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => setCurrentScreen('paper-select')}
-                className={`px-3 py-1.5 rounded-xl transition-all ${
-                  currentScreen === 'paper-select' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                }`}
-              >
-                Paper ({selectedPaperCode})
-              </button>
-              <button
-                onClick={() => setCurrentScreen('subjects')}
-                className={`px-3 py-1.5 rounded-xl transition-all ${
-                  currentScreen === 'subjects' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                }`}
-              >
-                Subjects
-              </button>
-              <button
-                onClick={startMockQuiz}
-                className={`px-3 py-1.5 rounded-xl transition-all ${
-                  currentScreen === 'mock-test' ? 'bg-[#1CA3DC] text-slate-950' : 'text-slate-300 hover:bg-slate-900'
-                }`}
-              >
-                Mock Test
-              </button>
-              <button
-                onClick={() => setCurrentScreen('analytics')}
-                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
-                  currentScreen === 'analytics' ? 'bg-purple-600 text-white' : 'text-purple-300 hover:bg-slate-900'
-                }`}
-              >
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>Analytics &amp; Insights</span>
-              </button>
-            </div>
-
-            {/* Right Controls: Theme Toggle & Profile Button */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
-                className={`p-2 rounded-xl border transition-all ${
-                  themeMode === 'dark' ? 'bg-slate-900 border-slate-800 text-amber-400' : 'bg-slate-200 border-slate-300 text-slate-700'
-                }`}
-              >
-                {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
-
-              <button
-                onClick={openProfileModal}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-200 transition-all shadow-md"
-              >
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-600 to-[#1CA3DC] text-white font-black text-[11px] flex items-center justify-center">
-                  {studentName.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden sm:inline font-semibold">{studentName}</span>
-                <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
-                  {selectedPaperCode}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* 👤 STUDENT PROFILE CREATION & EDIT MODAL */}
       {isProfileModalOpen && (
@@ -883,6 +795,65 @@ export default function Gate3DApp() {
 
       {/* Main Content Area */}
       <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Sleek Sub-Navigation Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8 bg-slate-900/80 backdrop-blur-md p-2 rounded-2xl border border-slate-800 shadow-lg">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+            <button
+              onClick={() => setCurrentScreen('dashboard')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                currentScreen === 'dashboard' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setCurrentScreen('paper-select')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                currentScreen === 'paper-select' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              Paper ({selectedPaperCode})
+            </button>
+            <button
+              onClick={() => setCurrentScreen('subjects')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                currentScreen === 'subjects' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              Subjects
+            </button>
+            <button
+              onClick={startMockQuiz}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                currentScreen === 'mock-test' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              Mock Test
+            </button>
+            <button
+              onClick={() => setCurrentScreen('analytics')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+                currentScreen === 'analytics' ? 'bg-purple-600 text-white shadow-md' : 'text-purple-300 hover:bg-slate-800'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Analytics</span>
+            </button>
+          </div>
+
+          <button
+            onClick={openProfileModal}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 text-xs font-bold text-slate-200 transition-all shadow-sm"
+          >
+            <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-purple-600 to-[#1CA3DC] text-white font-black text-[10px] flex items-center justify-center">
+              {studentName.charAt(0).toUpperCase()}
+            </div>
+            <span className="font-semibold">{studentName}</span>
+            <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
+              {selectedPaperCode}
+            </span>
+          </button>
+        </div>
 
         {/* STEP 1 — 📊 DASHBOARD PAGE */}
         {currentScreen === 'dashboard' && (
