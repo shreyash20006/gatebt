@@ -285,7 +285,7 @@ export default function Navbar() {
                     className="w-full py-3 rounded-2xl bg-[#1CA3DC] text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
                   >
                     <KeyRound className="w-4 h-4" />
-                    <span>Sign In via Supabase</span>
+                    <span>Student Login</span>
                   </button>
                 )}
               </div>

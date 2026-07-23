@@ -85,7 +85,7 @@ export default function ProfilePage() {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-3">
         <div className="w-8 h-8 border-2 border-[#1CA3DC] border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs text-slate-400 font-medium">Loading Supabase Auth Session...</p>
+        <p className="text-xs text-slate-400 font-medium">Loading Student Session...</p>
       </div>
     );
   }
@@ -96,8 +96,8 @@ export default function ProfilePage() {
     const provider = user.app_metadata?.provider;
     if (provider === 'google') return 'Google Auth';
     if (provider === 'github') return 'GitHub Auth';
-    if (user.email) return 'Supabase Email OTP';
-    return 'Supabase Auth';
+    if (user.email) return 'Email OTP Verified';
+    return 'Secure Auth';
   };
 
   return (
@@ -107,10 +107,10 @@ export default function ProfilePage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-cyan-400 border border-blue-500/30 text-xs font-bold mb-1.5">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Supabase Authenticated Student Portal</span>
+            <span>Authenticated Student Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Student Profile & Goal Center</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Manage your Supabase login identity, target GATE papers, and preparation goals.</p>
+          <p className="text-xs text-slate-400 mt-0.5">Manage your login identity, target GATE papers, and preparation goals.</p>
         </div>
 
         <button
@@ -122,7 +122,7 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* If Not Logged In: Prompt Supabase Auth Card */}
+      {/* If Not Logged In: Prompt Auth Card */}
       {!user && (
         <div className="space-y-6">
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center justify-between gap-3">
@@ -133,7 +133,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* If Logged In: Supabase User Info Banner */}
+      {/* If Logged In: User Info Banner */}
       {user && (
         <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-700/60">
@@ -169,7 +169,7 @@ export default function ProfilePage() {
           {/* Account Details Chips */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div className="bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <div className="text-slate-400 font-medium">Supabase User ID</div>
+              <div className="text-slate-400 font-medium">Student Account ID</div>
               <div className="flex items-center justify-between text-white font-mono text-[11px]">
                 <span>{user.id.slice(0, 12)}...</span>
                 <button onClick={handleCopyUserId} className="text-cyan-400 hover:text-white p-1">

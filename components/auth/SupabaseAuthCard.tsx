@@ -57,7 +57,7 @@ export default function SupabaseAuthCard({ onSuccess }: SupabaseAuthCardProps) {
     if (error) {
       setErrorMsg(error.message || 'Invalid or expired OTP code. Please check and try again.');
     } else {
-      setSuccessMsg('Successfully authenticated with Supabase!');
+      setSuccessMsg('Successfully authenticated!');
       if (onSuccess) onSuccess();
     }
   };
@@ -80,7 +80,7 @@ export default function SupabaseAuthCard({ onSuccess }: SupabaseAuthCardProps) {
         <div className="w-12 h-12 rounded-2xl bg-[#1CA3DC]/10 border border-[#1CA3DC]/30 flex items-center justify-center mx-auto text-[#1CA3DC]">
           <Shield className="w-6 h-6" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Supabase Student Portal</h2>
+        <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">GATE Student Portal</h2>
         <p className="text-xs text-slate-400">Sign in with Email OTP or OAuth Providers to save notes & sync prep progress.</p>
       </div>
 
@@ -183,7 +183,7 @@ export default function SupabaseAuthCard({ onSuccess }: SupabaseAuthCardProps) {
               <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
             ) : (
               <>
-                <span>Send Supabase Email OTP</span>
+                <span>Send 6-Digit OTP</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

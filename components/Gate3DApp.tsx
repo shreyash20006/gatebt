@@ -980,7 +980,7 @@ export default function Gate3DApp() {
                 </div>
 
                 <div className="text-center space-y-2">
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Supabase 3D Auth Portal</h1>
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">GATE 2027 Aspirant Portal</h1>
                   <p className="text-xs text-slate-400">Enter your email for a passwordless 6-digit OTP code.</p>
                 </div>
 
@@ -1257,7 +1257,7 @@ export default function Gate3DApp() {
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Supabase Authenticated Session</span>
+                <span>Authenticated Student Session</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
                 Hi, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{user?.email?.split('@')[0] || 'Aspirant'}</span>! Choose your GATE Paper
@@ -1514,7 +1514,7 @@ export default function Gate3DApp() {
                               className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-xs text-white focus:outline-none focus:border-cyan-500"
                             />
                             <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-slate-500 font-medium">Synced with Supabase Cloud</span>
+                              <span className="text-[11px] text-slate-500 font-medium">Cloud Auto-Saved</span>
                               <button
                                 onClick={() => handleSaveTopicNote(topicKey, noteText)}
                                 disabled={savingNote}
@@ -1866,7 +1866,7 @@ export default function Gate3DApp() {
 
               <div className="space-y-1">
                 <h1 className="text-3xl font-black text-white">GATE Mock Test Performance Summary</h1>
-                <p className="text-xs text-slate-300">Attempt saved to Supabase Cloud Database.</p>
+                <p className="text-xs text-slate-300">Attempt saved to Secure Cloud Storage.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
