@@ -1,1711 +1,626 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import Logo from '@/components/brand/Logo';
-import { supabase } from '@/lib/supabase';
+import DirectDownloadButton from '@/components/DirectDownloadButton';
 import {
-  Shield,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
-  ArrowLeft,
+  Search,
+  Download,
+  FileText,
+  Brain,
+  BookOpen,
+  Sparkles,
   Building2,
   Dna,
   Cpu,
   Zap,
   Cog,
-  BookOpen,
   GraduationCap,
-  Sparkles,
-  CheckSquare,
-  Square,
-  Moon,
-  Sun,
-  ChevronRight,
-  FileText,
-  Video,
-  Layers,
-  Award,
-  BarChart3,
-  Flame,
-  Clock,
-  Target,
-  Trophy,
-  Edit3,
-  Save,
-  HelpCircle,
-  RotateCcw,
-  Check,
-  TrendingUp,
-  PieChart,
-  Bell,
-  Calendar,
-  AlertTriangle,
-  Activity,
-  User,
-  Settings,
+  Calculator,
+  CheckCircle2,
+  Eye,
   X,
+  Star,
+  Layers,
+  ArrowRight,
+  Filter,
+  FileCheck,
+  Flame,
+  Award,
 } from 'lucide-react';
 
 // ==========================================
-// CONFIGURATION & DATA MAPS
+// TYPES & DISCIPLINE CONFIG
 // ==========================================
-interface GatePaper {
-  code: string;
-  name: string;
-  category: string;
-  icon: any;
-  color: string;
-  borderColor: string;
-  glowColor: string;
-  desc: string;
-}
-
-const GATE_PAPERS: GatePaper[] = [
-  {
-    code: 'CE',
-    name: 'Civil Engineering',
-    category: 'Core Infrastructure',
-    icon: Building2,
-    color: 'from-[#1CA3DC] to-blue-600',
-    borderColor: 'hover:border-cyan-500/80',
-    glowColor: 'shadow-cyan-500/20',
-    desc: 'Structures, Geotechnical, Water Resources, Transport & Surveying',
-  },
-  {
-    code: 'BT',
-    name: 'Biotechnology',
-    category: 'Biosciences & Tech',
-    icon: Dna,
-    color: 'from-purple-500 to-indigo-600',
-    borderColor: 'hover:border-purple-500/80',
-    glowColor: 'shadow-purple-500/20',
-    desc: 'Biochemistry, Microbiology, Bioprocess & Molecular Biology',
-  },
-  {
-    code: 'CS',
-    name: 'Computer Science',
-    category: 'Software & Computing',
-    icon: Cpu,
-    color: 'from-cyan-400 to-blue-600',
-    borderColor: 'hover:border-blue-400/80',
-    glowColor: 'shadow-blue-500/20',
-    desc: 'Data Structures, Algorithms, OS, DBMS & Computer Networks',
-  },
-  {
-    code: 'EE',
-    name: 'Electrical Engineering',
-    category: 'Power & Circuits',
-    icon: Zap,
-    color: 'from-amber-400 to-orange-600',
-    borderColor: 'hover:border-amber-400/80',
-    glowColor: 'shadow-amber-500/20',
-    desc: 'Electrical Machines, Power Systems, Control Systems & Signals',
-  },
-  {
-    code: 'ME',
-    name: 'Mechanical Engineering',
-    category: 'Thermal & Mechanics',
-    icon: Cog,
-    color: 'from-rose-500 to-red-600',
-    borderColor: 'hover:border-rose-400/80',
-    glowColor: 'shadow-rose-500/20',
-    desc: 'Thermodynamics, Fluid Mechanics, Manufacturing & SOM',
-  },
-];
-
-interface Subject {
+export interface StudyResource {
   id: string;
-  name: string;
-  weightage: string;
-  weightagePercent: number;
-  iconName: string;
-  desc: string;
-  checklist: string[];
-}
-
-const PAPER_SUBJECTS: Record<string, Subject[]> = {
-  CE: [
-    {
-      id: 'ce-structural',
-      name: 'Structural Engineering',
-      weightage: '20–25%',
-      weightagePercent: 25,
-      iconName: 'Building2',
-      desc: 'Engineering Mechanics, SOM, Structural Analysis, RCC & Steel Structures.',
-      checklist: ['Solid Mechanics (SOM) Basics', 'Bending & Shear Stresses', 'Trusses & Frames', 'RCC Beam Design', 'Steel Connections & Beams'],
-    },
-    {
-      id: 'ce-geotech',
-      name: 'Geotechnical Engineering',
-      weightage: '15–18%',
-      weightagePercent: 18,
-      iconName: 'Layers',
-      desc: 'Soil Mechanics, Permeability, Shear Strength, Consolidation & Foundations.',
-      checklist: ['Phase Relationships', 'Permeability & Seepage', 'Consolidation Theory', 'Direct Shear & Triaxial Test', 'Shallow & Deep Foundations'],
-    },
-    {
-      id: 'ce-water',
-      name: 'Water Resources Engineering',
-      weightage: '12–16%',
-      weightagePercent: 15,
-      iconName: 'Zap',
-      desc: 'Fluid Mechanics, Hydraulics, Open Channel Flow, Hydrology & Irrigation.',
-      checklist: ['Fluid Statics & Dynamics', 'Pipe Flow & Losses', 'Open Channel Uniform Flow', 'Hydrograph Analysis', 'Irrigation Water Requirements'],
-    },
-    {
-      id: 'ce-environmental',
-      name: 'Environmental Engineering',
-      weightage: '8–10%',
-      weightagePercent: 10,
-      iconName: 'Sparkles',
-      desc: 'Water Quality, Treatment Processes, Sewage Treatment & Air Pollution.',
-      checklist: ['Water Quality Parameters', 'Sedimentation & Filtration', 'Activated Sludge Process', 'Air Pollutants & Dispersion', 'Municipal Solid Waste'],
-    },
-    {
-      id: 'ce-transport',
-      name: 'Transportation Engineering',
-      weightage: '8–10%',
-      weightagePercent: 10,
-      iconName: 'Award',
-      desc: 'Highway Design, Traffic Engineering, Pavement Design & Railways.',
-      checklist: ['Highway Geometric Design', 'Sight Distances (SSD/OSD)', 'Traffic Flow Characteristics', 'Flexible Pavement Design', 'Rail Geometry'],
-    },
-  ],
-  BT: [
-    {
-      id: 'bt-biochem',
-      name: 'Biochemistry',
-      weightage: '15–18%',
-      weightagePercent: 18,
-      iconName: 'Dna',
-      desc: 'Structure of Biomolecules, Enzyme Kinetics & Metabolic Pathways.',
-      checklist: ['Amino Acids & Protein Folding', 'Michaelis-Menten Kinetics', 'Glycolysis & TCA Cycle', 'Oxidative Phosphorylation', 'Lipid & Nucleotide Metabolism'],
-    },
-    {
-      id: 'bt-bioprocess',
-      name: 'Bioprocess Engineering',
-      weightage: '20–25%',
-      weightagePercent: 22,
-      iconName: 'Cog',
-      desc: 'Mass & Energy Balances, Bioreactor Design, Sterilization & Downstream.',
-      checklist: ['Stoichiometry of Cell Growth', 'Design of CSTR & Batch Reactors', 'Aeration & Oxygen Transfer (kLa)', 'Media Sterilization Kinetics', 'Filtration & Chromatography'],
-    },
-    {
-      id: 'bt-molbio',
-      name: 'Genetics & Molecular Biology',
-      weightage: '15–18%',
-      weightagePercent: 16,
-      iconName: 'Dna',
-      desc: 'DNA Replication, Transcription, Translation, Operons & Recombinant DNA.',
-      checklist: ['Replication Machinery', 'Eukaryotic Transcription', 'Lac & Trp Operon Regulation', 'Restriction Enzymes & Cloning Vectors', 'PCR & DNA Sequencing'],
-    },
-  ],
-  CS: [
-    {
-      id: 'cs-dsa',
-      name: 'Data Structures & Algorithms',
-      weightage: '18–22%',
-      weightagePercent: 20,
-      iconName: 'Cpu',
-      desc: 'Arrays, Trees, Graphs, Sorting, Dynamic Programming & Complexity.',
-      checklist: ['Asymptotic Notation (Big-O)', 'Binary Search Trees & AVL', 'Graph BFS/DFS & Shortest Path', 'Sorting Algorithms', 'Dynamic Programming Patterns'],
-    },
-    {
-      id: 'cs-os',
-      name: 'Operating Systems',
-      weightage: '8–10%',
-      weightagePercent: 10,
-      iconName: 'Layers',
-      desc: 'Process Management, Threads, CPU Scheduling, Deadlocks & Memory.',
-      checklist: ['Process State & Context Switching', 'Semaphores & Mutex', 'Banker\'s Deadlock Algorithm', 'Paging & Virtual Memory'],
-    },
-  ],
-  EE: [
-    {
-      id: 'ee-machines',
-      name: 'Electrical Machines',
-      weightage: '12–15%',
-      weightagePercent: 14,
-      iconName: 'Zap',
-      desc: 'Transformers, Induction Motors, Synchronous Machines & DC Drives.',
-      checklist: ['Transformer Equivalent Circuit', 'Induction Motor Torque-Speed', 'Synchronous Generator Phasing', 'DC Motor Speed Control'],
-    },
-  ],
-  ME: [
-    {
-      id: 'me-thermo',
-      name: 'Thermodynamics & Applied',
-      weightage: '12–15%',
-      weightagePercent: 14,
-      iconName: 'Zap',
-      desc: 'Laws of Thermodynamics, Power Cycles, Refrigeration & IC Engines.',
-      checklist: ['First & Second Law Systems', 'Otto, Diesel & Rankine Cycles', 'Refrigeration COP', 'Psychrometric Chart Properties'],
-    },
-  ],
-};
-
-interface Question {
-  id: string;
-  paper_code: string;
+  title: string;
+  discipline: 'CE' | 'BT' | 'CS' | 'EE' | 'ME' | 'Pharmacy' | 'Maths/GA';
+  disciplineName: string;
   subject: string;
-  question: string;
-  options: string[];
-  correct_answer: number;
-  marks: number;
-  negative_marks: number;
-  explanation: string;
+  subjectCode?: string;
+  type: 'Handwritten Notes' | 'Formula Sheet' | 'Mind Map' | 'PYQ Solutions' | 'Standard Book';
+  description: string;
+  fileSize: string;
+  pageCount: number;
+  downloadCount: number;
+  rating: number;
+  badge?: string;
+  filePath: string;
+  previewTopics: string[];
 }
 
-const SAMPLE_QUESTIONS: Question[] = [
-  {
-    id: 'q1',
-    paper_code: 'CE',
-    subject: 'Structural Engineering',
-    question: 'What is the maximum shear stress in a circular shaft subjected to torque T and diameter D?',
-    options: ['16T / (π D³)', '32T / (π D³)', '8T / (π D³)', '64T / (π D³)'],
-    correct_answer: 0,
-    marks: 1,
-    negative_marks: 0.33,
-    explanation: 'The maximum shear stress τ_max in a circular solid shaft under torsion is given by τ = 16T / (π D³).',
-  },
-  {
-    id: 'q2',
-    paper_code: 'CE',
-    subject: 'Structural Engineering',
-    question: 'In a simply supported beam of span L with a central point load W, the maximum bending moment is:',
-    options: ['W L / 8', 'W L / 4', 'W L / 2', 'W L'],
-    correct_answer: 1,
-    marks: 2,
-    negative_marks: 0.67,
-    explanation: 'Maximum bending moment for a simply supported beam under central point load W occurs at center and equals W L / 4.',
-  },
-  {
-    id: 'q3',
-    paper_code: 'CE',
-    subject: 'Geotechnical Engineering',
-    question: 'According to Terzaghi, the ultimate bearing capacity for a continuous strip footing is:',
-    options: [
-      'c N_c + q N_q + 0.5 γ B N_γ',
-      '1.3 c N_c + q N_q + 0.4 γ B N_γ',
-      'c N_c + q N_q + 0.3 γ B N_γ',
-      '1.3 c N_c + q N_q + 0.3 γ B N_γ',
-    ],
-    correct_answer: 0,
-    marks: 1,
-    negative_marks: 0.33,
-    explanation: 'Terzaghi ultimate bearing capacity equation for strip footing: q_u = c N_c + q N_q + 0.5 γ B N_γ.',
-  },
-  {
-    id: 'q4',
-    paper_code: 'BT',
-    subject: 'Biochemistry',
-    question: 'The Km value of an enzyme represents:',
-    options: ['Substrate concentration at Vmax', 'Substrate concentration at half Vmax', 'Maximum reaction velocity', 'Enzyme concentration'],
-    correct_answer: 1,
-    marks: 1,
-    negative_marks: 0.33,
-    explanation: 'Michaelis constant Km equals the substrate concentration at which reaction rate is half of Vmax.',
-  },
+const DISCIPLINES = [
+  { code: 'ALL', name: 'All Disciplines', icon: Sparkles, color: 'from-[#1CA3DC] to-blue-600' },
+  { code: 'CE', name: 'Civil (CE)', icon: Building2, color: 'from-cyan-500 to-blue-600' },
+  { code: 'BT', name: 'Biotechnology (BT)', icon: Dna, color: 'from-purple-500 to-indigo-600' },
+  { code: 'CS', name: 'Computer Science (CS)', icon: Cpu, color: 'from-cyan-400 to-blue-600' },
+  { code: 'EE', name: 'Electrical (EE)', icon: Zap, color: 'from-amber-400 to-orange-600' },
+  { code: 'ME', name: 'Mechanical (ME)', icon: Cog, color: 'from-rose-500 to-red-600' },
+  { code: 'Maths/GA', name: 'Maths & Aptitude', icon: Calculator, color: 'from-emerald-400 to-teal-600' },
+  { code: 'Pharmacy', name: 'B.Pharmacy DBATU', icon: GraduationCap, color: 'from-pink-500 to-rose-600' },
 ];
 
-// Custom 3D Tilt Hook
-function use3DTilt(maxTilt = 15) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || window.innerWidth < 640) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    const rotateX = (-(y / (rect.height / 2)) * maxTilt).toFixed(2);
-    const rotateY = ((x / (rect.width / 2)) * maxTilt).toFixed(2);
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
-  };
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-  };
-  return { cardRef, handleMouseMove, handleMouseLeave };
-}
+const RESOURCE_TYPES = [
+  'All Material',
+  'Handwritten Notes',
+  'Formula Sheet',
+  'Mind Map',
+  'PYQ Solutions',
+  'Standard Book',
+];
 
-const Tilt3DCard = ({ children, className = '', maxTilt = 12, onClick }: any) => {
-  const { cardRef, handleMouseMove, handleMouseLeave } = use3DTilt(maxTilt);
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={onClick}
-      className={`transition-transform duration-200 ease-out style-3d cursor-pointer ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+// Comprehensive Study Materials Dataset
+const STUDY_MATERIALS_DATA: StudyResource[] = [
+  // CIVIL ENGINEERING (CE)
+  {
+    id: 'ce-som-notes',
+    title: 'Solid Mechanics (SOM) — Complete Handwritten Notes',
+    discipline: 'CE',
+    disciplineName: 'Civil Engineering',
+    subject: 'Structural Engineering',
+    subjectCode: 'CE-SOM',
+    type: 'Handwritten Notes',
+    description: 'Detailed toppers handwritten notes covering Stress-Strain, Bending Stresses, Torsion of Shafts, SFD & BMD, Thin Cylinders and Deflection of Beams.',
+    fileSize: '18.4 MB',
+    pageCount: 142,
+    downloadCount: 3420,
+    rating: 4.9,
+    badge: '🔥 Topper Recommended',
+    filePath: 'notes/ce-solid-mechanics.pdf',
+    previewTopics: ['Hooke’s Law & Elastic Constants', 'Shear Force & Bending Moment Diagrams', 'Euler’s Column Buckling Theory', 'Principal Stresses & Mohr’s Circle'],
+  },
+  {
+    id: 'ce-geotech-notes',
+    title: 'Geotechnical Engineering & Soil Mechanics Notes',
+    discipline: 'CE',
+    disciplineName: 'Civil Engineering',
+    subject: 'Geotechnical Engineering',
+    subjectCode: 'CE-GT',
+    type: 'Handwritten Notes',
+    description: 'Comprehensive Soil Mechanics & Foundation Engineering notes with solved GATE numerical problems, phase relationships, consolidation & shear strength.',
+    fileSize: '22.1 MB',
+    pageCount: 168,
+    downloadCount: 2890,
+    rating: 4.9,
+    badge: 'High Yield',
+    filePath: 'notes/ce-geotechnical.pdf',
+    previewTopics: ['Index Properties of Soils', 'Terzaghi 1D Consolidation Theory', 'Direct Shear & Triaxial Test Equations', 'Shallow & Pile Foundation Capacity'],
+  },
+  {
+    id: 'ce-fluid-formula',
+    title: 'Fluid Mechanics & Hydraulics — Formula & Summary Sheet',
+    discipline: 'CE',
+    disciplineName: 'Civil Engineering',
+    subject: 'Water Resources',
+    subjectCode: 'CE-FM',
+    type: 'Formula Sheet',
+    description: 'Quick revision formula cheat-sheet for Open Channel Flow, Hydrographs, Pipe Losses, Navier-Stokes and Bernoulli Equation.',
+    fileSize: '4.8 MB',
+    pageCount: 32,
+    downloadCount: 4120,
+    rating: 4.8,
+    badge: 'Quick Revision',
+    filePath: 'notes/ce-fluid-mechanics-formula.pdf',
+    previewTopics: ['Bernoulli & Continuity Equations', 'Hazen-Williams Pipe Friction Losses', 'Open Channel Uniform & Rapidly Varied Flow', 'Unit Hydrograph Derivation'],
+  },
+  {
+    id: 'ce-transport-pyq',
+    title: 'Transportation Engineering — GATE PYQ Solutions (2015-2024)',
+    discipline: 'CE',
+    disciplineName: 'Civil Engineering',
+    subject: 'Transportation Engineering',
+    subjectCode: 'CE-TE',
+    type: 'PYQ Solutions',
+    description: 'Chapterwise solved previous 10 years GATE questions with step-by-step solutions for SSD, OSD, Flexible Pavement Design and Traffic Signal Timing.',
+    fileSize: '15.6 MB',
+    pageCount: 96,
+    downloadCount: 1980,
+    rating: 4.7,
+    filePath: 'notes/ce-transportation-pyqs.pdf',
+    previewTopics: ['Stopping Sight Distance (SSD) Equations', 'Overtaking Sight Distance (OSD) Mechanics', 'CBR Method Pavement Thickness', 'Webster Method Signal Timing'],
+  },
+
+  // BIOTECHNOLOGY (BT)
+  {
+    id: 'bt-biochem-notes',
+    title: 'Biochemistry — Complete Topper Handwritten Notes',
+    discipline: 'BT',
+    disciplineName: 'Biotechnology',
+    subject: 'Biochemistry',
+    subjectCode: 'BT-BC',
+    type: 'Handwritten Notes',
+    description: 'Detailed handwritten notes on Amino Acid Properties, Protein Folding, Enzyme Kinetics (Michaelis-Menten, Lineweaver-Burk), Glycolysis, TCA & OXPHOS.',
+    fileSize: '14.2 MB',
+    pageCount: 118,
+    downloadCount: 5210,
+    rating: 5.0,
+    badge: '⭐ #1 Rated Notes',
+    filePath: 'biochemistry.pdf',
+    previewTopics: ['Ramachandran Plot Analysis', 'Michaelis-Menten Kinetics Derivation', 'Glycolysis & Citric Acid Cycle ATP Yield', 'Oxidative Phosphorylation Complexes'],
+  },
+  {
+    id: 'bt-molbio-mindmap',
+    title: 'Molecular Biology & Recombinant DNA — 3D Mind Maps',
+    discipline: 'BT',
+    disciplineName: 'Biotechnology',
+    subject: 'Molecular Biology',
+    subjectCode: 'BT-MB',
+    type: 'Mind Map',
+    description: 'Visual 3D mind maps connecting DNA Replication machinery, Transcription factors, Lac & Trp Operons, PCR principles & Cloning Vectors.',
+    fileSize: '6.5 MB',
+    pageCount: 24,
+    downloadCount: 3840,
+    rating: 4.9,
+    badge: 'Visual Revision',
+    filePath: 'notes/bt-molbio-mindmap.pdf',
+    previewTopics: ['DNA Polymerase I, III Functions', 'Prokaryotic vs Eukaryotic Transcription', 'Restriction Endonuclease Cutting Maps', 'Sanger vs Next-Gen Sequencing Workflow'],
+  },
+  {
+    id: 'bt-bioprocess-formula',
+    title: 'Bioprocess Engineering — Master Formula Book & Kinetics',
+    discipline: 'BT',
+    disciplineName: 'Biotechnology',
+    subject: 'Bioprocess Engineering',
+    subjectCode: 'BT-BE',
+    type: 'Formula Sheet',
+    description: 'Complete formula sheet for Cell Growth Stoichiometry, Monod Kinetics, CSTR & Batch Bioreactor Design, kLa Mass Transfer & Sterilization Kinetics.',
+    fileSize: '8.2 MB',
+    pageCount: 48,
+    downloadCount: 4620,
+    rating: 4.9,
+    badge: '25% GATE Weightage',
+    filePath: 'bioprocess.pdf',
+    previewTopics: ['Monod Growth Model & Yield Coefficients', 'Batch & Continuous CSTR Mass Balances', 'Oxygen Transfer Rate (OTR) & kLa Evaluation', 'Del Factor Sterilization Calculations'],
+  },
+  {
+    id: 'bt-pyq-book',
+    title: 'GATE Biotechnology Complete Solved Question Bank (2019-2024)',
+    discipline: 'BT',
+    disciplineName: 'Biotechnology',
+    subject: 'All BT Subjects',
+    subjectCode: 'BT-ALL',
+    type: 'PYQ Solutions',
+    description: 'Comprehensive 5-year solved GATE BT papers with detailed explanations for NAT (Numerical Answer Type) questions and MCQ shortcuts.',
+    fileSize: '24.5 MB',
+    pageCount: 210,
+    downloadCount: 6100,
+    rating: 5.0,
+    badge: 'Must Have',
+    filePath: 'gate-bt-question-bank-2019-2024.pdf',
+    previewTopics: ['Enzyme Kinetics NAT Calculations', 'Bioprocess Reactor Volume Numerical Solutions', 'Genetics Linkage & Recombination Frequency', 'Thermodynamics Free Energy Problems'],
+  },
+
+  // COMPUTER SCIENCE (CS)
+  {
+    id: 'cs-dsa-notes',
+    title: 'Data Structures & Algorithms — Complete Notes & Code Patterns',
+    discipline: 'CS',
+    disciplineName: 'Computer Science',
+    subject: 'DSA & Algorithms',
+    subjectCode: 'CS-DSA',
+    type: 'Handwritten Notes',
+    description: 'Master notes covering Asymptotic Analysis, Trees (AVL, Red-Black), Graph Algorithms (Dijkstra, Prim, Kruskal, BFS/DFS) and Dynamic Programming patterns.',
+    fileSize: '19.8 MB',
+    pageCount: 160,
+    downloadCount: 7890,
+    rating: 4.9,
+    badge: '🔥 Essential CS',
+    filePath: 'notes/cs-dsa-notes.pdf',
+    previewTopics: ['Big-O, Big-Omega & Theta Notations', 'Binary Search Tree Balancing Rules', 'Dijkstra & Floyd-Warshall Algorithms', 'DP Knapsack & Longest Common Subsequence'],
+  },
+  {
+    id: 'cs-os-formula',
+    title: 'Operating Systems — Quick Revision & Formula Cheat-Sheet',
+    discipline: 'CS',
+    disciplineName: 'Computer Science',
+    subject: 'Operating Systems',
+    subjectCode: 'CS-OS',
+    type: 'Formula Sheet',
+    description: 'Concise summary of CPU Scheduling (FCFS, SJF, Round Robin), Banker\'s Deadlock Avoidance, Paging, Page Replacement (LRU, FIFO) & Virtual Memory.',
+    fileSize: '5.1 MB',
+    pageCount: 36,
+    downloadCount: 3950,
+    rating: 4.8,
+    filePath: 'notes/cs-operating-systems.pdf',
+    previewTopics: ['Turnaround Time & Waiting Time Formulas', 'Semaphores & Producer-Consumer Problem', 'Page Table Entry & TLB Hit Ratio Math', 'Disk Scheduling (SCAN, C-LOOK)'],
+  },
+
+  // ELECTRICAL ENGINEERING (EE)
+  {
+    id: 'ee-machines-notes',
+    title: 'Electrical Machines — Complete Comprehensive Notes',
+    discipline: 'EE',
+    disciplineName: 'Electrical Engineering',
+    subject: 'Electrical Machines',
+    subjectCode: 'EE-EM',
+    type: 'Handwritten Notes',
+    description: 'In-depth notes on Transformers (Equivalent Circuit, Losses, Efficiency), 3-Phase Induction Motors, Synchronous Generators and DC Machines.',
+    fileSize: '21.0 MB',
+    pageCount: 154,
+    downloadCount: 3120,
+    rating: 4.9,
+    badge: 'High Yield',
+    filePath: 'notes/ee-electrical-machines.pdf',
+    previewTopics: ['Transformer Voltage Regulation & Open/Short Circuit Test', 'Induction Motor Torque-Speed Characteristics', 'Synchronous Machine Phasor Diagrams', 'DC Generator Armature Reaction'],
+  },
+
+  // MECHANICAL ENGINEERING (ME)
+  {
+    id: 'me-thermo-notes',
+    title: 'Thermodynamics & Thermal Engineering — Master Notes',
+    discipline: 'ME',
+    disciplineName: 'Mechanical Engineering',
+    subject: 'Thermodynamics',
+    subjectCode: 'ME-TH',
+    type: 'Handwritten Notes',
+    description: 'Clear concepts on 1st & 2nd Laws of Thermodynamics, Entropy, Avogadro Cycle, Otto, Diesel, Rankine Power Cycles and Refrigeration COP.',
+    fileSize: '17.3 MB',
+    pageCount: 130,
+    downloadCount: 4210,
+    rating: 4.8,
+    filePath: 'notes/me-thermodynamics.pdf',
+    previewTopics: ['First Law Steady Flow Energy Equation (SFEE)', 'Carnot Efficiency & Clausius Inequality', 'Air Standard Otto & Diesel Cycle Relations', 'Psychrometric Chart Properties'],
+  },
+
+  // MATHS & APTITUDE
+  {
+    id: 'maths-gate-book',
+    title: 'Engineering Mathematics for All GATE Papers — Complete Notes',
+    discipline: 'Maths/GA',
+    disciplineName: 'Maths & Aptitude',
+    subject: 'Engineering Mathematics',
+    subjectCode: 'ALL-EM',
+    type: 'Handwritten Notes',
+    description: '15 Marks guaranteed! Covers Linear Algebra (Eigenvalues & Eigenvectors), Calculus (Limits, Partial Derivatives, Maxima/Minima), Differential Equations & Probability.',
+    fileSize: '16.2 MB',
+    pageCount: 110,
+    downloadCount: 8940,
+    rating: 5.0,
+    badge: '15 GATE Marks',
+    filePath: 'eng-math.pdf',
+    previewTopics: ['Cayley-Hamilton Theorem & Matrix Inverse', 'Taylor & Maclaurin Series Expansions', 'First Order & Second Order Differential Equations', 'Binomial, Poisson & Normal Probability Distributions'],
+  },
+  {
+    id: 'general-aptitude-sheet',
+    title: 'General Aptitude (GA) — 15 Marks Formula & Practice Sheet',
+    discipline: 'Maths/GA',
+    disciplineName: 'Maths & Aptitude',
+    subject: 'General Aptitude',
+    subjectCode: 'ALL-GA',
+    type: 'Formula Sheet',
+    description: 'Shortcut tricks for Numerical Ability, Time & Work, Speed Distance, Spatial Reasoning, Syllogisms & English Grammar rules.',
+    fileSize: '7.5 MB',
+    pageCount: 52,
+    downloadCount: 9200,
+    rating: 4.9,
+    badge: 'Mandatory 15 Marks',
+    filePath: 'general-aptitude.pdf',
+    previewTopics: ['Time, Speed & Distance Relative Velocity Formulas', 'Permutations, Combinations & Probability Tricks', 'Data Interpretation Charts & Percentages', 'Spatial Reasoning Cube Folding Patterns'],
+  },
+
+  // B.PHARMACY
+  {
+    id: 'pharma-organic-notes',
+    title: 'Pharmaceutical Organic Chemistry — Complete Notes (BP202T)',
+    discipline: 'Pharmacy',
+    disciplineName: 'B.Pharmacy DBATU',
+    subject: 'Organic Chemistry',
+    subjectCode: 'BP202T',
+    type: 'Handwritten Notes',
+    description: 'Detailed notes for DBATU B.Pharmacy students covering SN1/SN2 mechanisms, Electrophilic Additions, Isomerism and Alkyl Halide reactions.',
+    fileSize: '13.4 MB',
+    pageCount: 105,
+    downloadCount: 2650,
+    rating: 4.8,
+    filePath: 'bp202t.pdf',
+    previewTopics: ['SN1 vs SN2 Reaction Mechanisms', 'Markovnikov & Anti-Markovnikov Rule', 'Reactions of Conjugated Dienes', 'E1 and E2 Elimination Kinetics'],
+  },
+];
 
 export default function Gate3DApp() {
-  // Direct Access Screens (NO LOGIN WALL REQUIRED): 'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
-  const [currentScreen, setCurrentScreen] = useState<
-    'dashboard' | 'paper-select' | 'subjects' | 'subject-detail' | 'mock-test' | 'test-result' | 'analytics'
-  >('dashboard');
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string>('ALL');
+  const [selectedType, setSelectedType] = useState<string>('All Material');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [previewResource, setPreviewResource] = useState<StudyResource | null>(null);
 
-  // Student Profile State (Stored in LocalStorage - No Login Required!)
-  const [studentName, setStudentName] = useState<string>('GATE Aspirant');
-  const [selectedPaperCode, setSelectedPaperCode] = useState<string>('CE');
-  const [dailyGoalHours, setDailyGoalHours] = useState<number>(4.0);
-  const [targetGateScore, setTargetGateScore] = useState<number>(700);
+  // Filtered Study Materials
+  const filteredMaterials = useMemo(() => {
+    return STUDY_MATERIALS_DATA.filter((item) => {
+      const matchesDiscipline = selectedDiscipline === 'ALL' || item.discipline === selectedDiscipline;
+      const matchesType = selectedType === 'All Material' || item.type === selectedType;
 
-  // Profile Modal State
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
-  const [editName, setEditName] = useState<string>('');
-  const [editPaper, setEditPaper] = useState<string>('CE');
-  const [editGoal, setEditGoal] = useState<number>(4.0);
-  const [editTargetScore, setEditTargetScore] = useState<number>(700);
+      const query = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.subject.toLowerCase().includes(query) ||
+        (item.subjectCode && item.subjectCode.toLowerCase().includes(query)) ||
+        item.description.toLowerCase().includes(query) ||
+        item.previewTopics.some((t) => t.toLowerCase().includes(query));
 
-  // Content Selection & Progress
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
-  const [topicNotes, setTopicNotes] = useState<Record<string, string>>({});
-  const [activeTopicNoteId, setActiveTopicNoteId] = useState<string | null>(null);
-  const [savingNote, setSavingNote] = useState(false);
-
-  // Analytics & Reminders States
-  const [studyMinutesToday, setStudyMinutesToday] = useState<number>(145);
-  const [notifPermission, setNotifPermission] = useState<string>('default');
-
-  // Countdown to Feb 6, 2027
-  const [daysLeft, setDaysLeft] = useState<number>(0);
-
-  // Theme Mode
-  const [themeMode, setThemeMode] = useState<'dark' | 'light'>('dark');
-
-  // Confetti Animation Ref
-  const confettiCanvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Mock Test Engine States
-  const [quizQuestions, setQuizQuestions] = useState<Question[]>(SAMPLE_QUESTIONS);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
-  const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({});
-  const [quizTimer, setQuizTimer] = useState<number>(600);
-  const [testResult, setTestResult] = useState<{
-    score: number;
-    maxScore: number;
-    accuracy: number;
-    correctCount: number;
-    wrongCount: number;
-    skippedCount: number;
-  } | null>(null);
-
-  // Load Saved Profile & Progress on Mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if ('Notification' in window) {
-        setNotifPermission(Notification.permission);
-      }
-
-      // Load Profile from LocalStorage
-      const savedProfile = localStorage.getItem('gate3d_student_profile');
-      if (savedProfile) {
-        try {
-          const parsed = JSON.parse(savedProfile);
-          if (parsed.name) setStudentName(parsed.name);
-          if (parsed.paper) setSelectedPaperCode(parsed.paper);
-          if (parsed.dailyGoal) setDailyGoalHours(parsed.dailyGoal);
-          if (parsed.targetScore) setTargetGateScore(parsed.targetScore);
-        } catch (e) {}
-      }
-
-      // Load Completed Topics
-      const savedTopics = localStorage.getItem('gate3d_completed_topics');
-      if (savedTopics) {
-        try {
-          setCompletedTopics(JSON.parse(savedTopics));
-        } catch (e) {}
-      }
-
-      // Load Topic Notes
-      const savedNotes = localStorage.getItem('gate3d_topic_notes');
-      if (savedNotes) {
-        try {
-          setTopicNotes(JSON.parse(savedNotes));
-        } catch (e) {}
-      }
-    }
-  }, []);
-
-  // Time Tracker Auto-Logger (Logs 1 minute every 60s when viewing subject detail page)
-  useEffect(() => {
-    let interval: any;
-    if (currentScreen === 'subject-detail' && selectedSubject) {
-      interval = setInterval(() => {
-        setStudyMinutesToday((prev) => prev + 1);
-      }, 60000); // every 1 min
-    }
-    return () => clearInterval(interval);
-  }, [currentScreen, selectedSubject]);
-
-  // Countdown calculation to Feb 6, 2027
-  useEffect(() => {
-    const examDate = new Date('2027-02-06T09:30:00+05:30').getTime();
-    const now = new Date().getTime();
-    const diff = Math.max(0, Math.ceil((examDate - now) / (1000 * 60 * 60 * 24)));
-    setDaysLeft(diff);
-  }, []);
-
-  // Quiz Timer
-  useEffect(() => {
-    let interval: any;
-    if (currentScreen === 'mock-test' && quizTimer > 0) {
-      interval = setInterval(() => {
-        setQuizTimer((prev) => {
-          if (prev <= 1) {
-            handleFinishQuiz();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [currentScreen, quizTimer]);
-
-  // Save Profile Handler
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = editName.trim() || 'GATE Aspirant';
-    setStudentName(name);
-    setSelectedPaperCode(editPaper);
-    setDailyGoalHours(editGoal);
-    setTargetGateScore(editTargetScore);
-
-    const profileData = {
-      name,
-      paper: editPaper,
-      dailyGoal: editGoal,
-      targetScore: editTargetScore,
-    };
-    localStorage.setItem('gate3d_student_profile', JSON.stringify(profileData));
-    setIsProfileModalOpen(false);
-  };
-
-  const openProfileModal = () => {
-    setEditName(studentName);
-    setEditPaper(selectedPaperCode);
-    setEditGoal(dailyGoalHours);
-    setEditTargetScore(targetGateScore);
-    setIsProfileModalOpen(true);
-  };
-
-  // Request Native Browser Notifications
-  const requestNotificationPermission = () => {
-    if ('Notification' in window) {
-      Notification.requestPermission().then((perm) => {
-        setNotifPermission(perm);
-        if (perm === 'granted') {
-          new Notification('GATE 3D Reminders Active 🚀', {
-            body: 'You will receive study streak & weak subject nudges!',
-          });
-        }
-      });
-    }
-  };
-
-  // Handle Select Paper
-  const handleSelectPaper = (paperCode: string) => {
-    setSelectedPaperCode(paperCode);
-    const saved = localStorage.getItem('gate3d_student_profile');
-    let profileData: any = {};
-    if (saved) {
-      try { profileData = JSON.parse(saved); } catch (e) {}
-    }
-    profileData.paper = paperCode;
-    localStorage.setItem('gate3d_student_profile', JSON.stringify(profileData));
-    setCurrentScreen('subjects');
-  };
-
-  // Toggle Topic Completion & Trigger Confetti 🎉 on 100%
-  const toggleTopicCompletion = (subjectId: string, topicName: string) => {
-    const key = `${subjectId}_${topicName}`;
-    const newStatus = !completedTopics[key];
-
-    setCompletedTopics((prev) => {
-      const updated = { ...prev, [key]: newStatus };
-      localStorage.setItem('gate3d_completed_topics', JSON.stringify(updated));
-
-      const currentSub = (PAPER_SUBJECTS[selectedPaperCode] || []).find((s) => s.id === subjectId);
-      if (currentSub) {
-        const completedCount = currentSub.checklist.filter((item) => updated[`${subjectId}_${item}`]).length;
-        if (completedCount === currentSub.checklist.length) {
-          triggerConfetti();
-        }
-      }
-      return updated;
+      return matchesDiscipline && matchesType && matchesSearch;
     });
-  };
-
-  // Confetti Animation 🎉
-  const triggerConfetti = () => {
-    const canvas = confettiCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles: any[] = [];
-    const colors = ['#1CA3DC', '#A855F7', '#EC4899', '#3B82F6', '#F59E0B', '#10B981'];
-
-    for (let i = 0; i < 140; i++) {
-      particles.push({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 16,
-        vy: (Math.random() - 0.7) * 18,
-        size: Math.random() * 8 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: 1,
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let alive = false;
-      particles.forEach((p) => {
-        if (p.alpha > 0) {
-          alive = true;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += 0.4;
-          p.alpha -= 0.015;
-          ctx.save();
-          ctx.globalAlpha = Math.max(0, p.alpha);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-          ctx.restore();
-        }
-      });
-      if (alive) requestAnimationFrame(animate);
-    };
-    animate();
-  };
-
-  // Save Personal Notes locally
-  const handleSaveTopicNote = (topicKey: string, content: string) => {
-    setTopicNotes((prev) => {
-      const updated = { ...prev, [topicKey]: content };
-      localStorage.setItem('gate3d_topic_notes', JSON.stringify(updated));
-      return updated;
-    });
-    setSavingNote(true);
-    setTimeout(() => setSavingNote(false), 800);
-  };
-
-  // Start Quiz
-  const startMockQuiz = () => {
-    setQuizQuestions(SAMPLE_QUESTIONS);
-    setCurrentQuestionIndex(0);
-    setUserAnswers({});
-    setMarkedForReview({});
-    setQuizTimer(600);
-    setTestResult(null);
-    setCurrentScreen('mock-test');
-  };
-
-  // Quiz Options
-  const handleSelectQuizOption = (optionIndex: number) => {
-    setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: optionIndex }));
-  };
-
-  const toggleMarkForReview = () => {
-    setMarkedForReview((prev) => ({ ...prev, [currentQuestionIndex]: !prev[currentQuestionIndex] }));
-  };
-
-  // Finish Quiz & Compute GATE Score
-  const handleFinishQuiz = () => {
-    let score = 0;
-    let maxScore = 0;
-    let correctCount = 0;
-    let wrongCount = 0;
-    let skippedCount = 0;
-
-    quizQuestions.forEach((q, idx) => {
-      maxScore += q.marks;
-      const selectedOpt = userAnswers[idx];
-
-      if (selectedOpt === undefined) {
-        skippedCount++;
-      } else if (selectedOpt === q.correct_answer) {
-        correctCount++;
-        score += q.marks;
-      } else {
-        wrongCount++;
-        score -= q.negative_marks;
-      }
-    });
-
-    const finalScore = Math.max(0, parseFloat(score.toFixed(2)));
-    const attemptedCount = correctCount + wrongCount;
-    const accuracy = attemptedCount > 0 ? parseFloat(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
-
-    setTestResult({
-      score: finalScore,
-      maxScore,
-      accuracy,
-      correctCount,
-      wrongCount,
-      skippedCount,
-    });
-    setCurrentScreen('test-result');
-  };
-
-  const selectedPaperObj = GATE_PAPERS.find((p) => p.code === selectedPaperCode) || GATE_PAPERS[0];
-  const currentSubjectsList = PAPER_SUBJECTS[selectedPaperCode] || PAPER_SUBJECTS['CE'];
-
-  // Overall Syllabus Completion Calculation
-  const totalTopicsInPaper = currentSubjectsList.reduce((acc, sub) => acc + sub.checklist.length, 0);
-  const totalTopicsCompleted = currentSubjectsList.reduce((acc, sub) => {
-    return acc + sub.checklist.filter((item) => completedTopics[`${sub.id}_${item}`]).length;
-  }, 0);
-  const overallPercentage = totalTopicsInPaper > 0 ? Math.round((totalTopicsCompleted / totalTopicsInPaper) * 100) : 0;
-
-  // Predictor Calculations
-  const mockAccuracy = testResult ? testResult.accuracy : 72; // default estimate
-  const predictedGateMarks = Math.round((mockAccuracy / 100) * 100 * 0.75 + overallPercentage * 0.25);
-  const predictedGateScore = Math.min(1000, Math.round(predictedGateMarks * 9.5));
-
-  // Weak Subject Detection
-  const weakSubjectsList = currentSubjectsList
-    .map((sub) => {
-      const completedCount = sub.checklist.filter((item) => completedTopics[`${sub.id}_${item}`]).length;
-      const subAcc = testResult ? testResult.accuracy : Math.round((completedCount / sub.checklist.length) * 100);
-      let status: 'Weak' | 'Average' | 'Strong' = 'Strong';
-      if (subAcc < 50) status = 'Weak';
-      else if (subAcc <= 75) status = 'Average';
-
-      const priorityScore = (100 - subAcc) * sub.weightagePercent;
-      return { ...sub, subAcc, status, priorityScore };
-    })
-    .sort((a, b) => b.priorityScore - a.priorityScore);
+  }, [selectedDiscipline, selectedType, searchQuery]);
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 relative overflow-hidden font-sans selection:bg-[#1CA3DC] selection:text-slate-950 ${
-        themeMode === 'dark' ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-100 text-slate-900'
-      }`}
-    >
-      <canvas ref={confettiCanvasRef} className="fixed inset-0 pointer-events-none z-50" />
-
-      {/* 3D Floating Background Spheres */}
+    <div className="min-h-screen bg-[#0B0F19] text-slate-100 font-sans selection:bg-[#1CA3DC] selection:text-slate-950 pb-20 relative overflow-hidden">
+      {/* Ambient background glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-purple-600/20 blur-3xl animate-pulse" />
-        <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl animate-pulse delay-700" />
-        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl animate-pulse delay-1000" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-purple-600/15 blur-3xl" />
+        <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-cyan-500/15 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-blue-600/15 blur-3xl" />
       </div>
 
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-8">
+        {/* ========================================== */}
+        {/* HERO BANNER & INSTANT SEARCH BAR */}
+        {/* ========================================== */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-10 rounded-3xl border border-slate-700/80 shadow-2xl space-y-6 relative overflow-hidden">
+          <div className="max-w-3xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>100% Free Open Access • Direct PDF Downloads</span>
+            </div>
 
+            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+              GATE Notes &amp; Study Materials Hub
+            </h1>
 
-      {/* 👤 STUDENT PROFILE CREATION & EDIT MODAL */}
-      {isProfileModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-md w-full space-y-6 shadow-2xl animate-fade-rise relative">
+            <p className="text-slate-300 text-xs sm:text-base leading-relaxed">
+              Instant direct downloads for handwritten notes, formula cheat-sheets, mind maps &amp; solved PYQs across all GATE disciplines &amp; Pharmacy streams.
+            </p>
+          </div>
+
+          {/* Instant Search Bar */}
+          <div className="relative max-w-2xl pt-2">
+            <div className="relative flex items-center">
+              <Search className="w-5 h-5 text-cyan-400 absolute left-4 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search notes, subjects, codes (e.g. SOM, Biochemistry, Formula Sheet, 2024 PYQ)..."
+                className="w-full bg-slate-950/90 border-2 border-slate-700 hover:border-cyan-500 focus:border-[#1CA3DC] rounded-2xl pl-12 pr-10 py-3.5 text-xs sm:text-sm text-white placeholder:text-slate-400 shadow-xl focus:outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================== */}
+        {/* DISCIPLINE SELECTOR CHIPS */}
+        {/* ========================================== */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
+            <span className="flex items-center gap-1.5 uppercase tracking-wider">
+              <Filter className="w-3.5 h-3.5 text-cyan-400" /> Select Engineering Discipline
+            </span>
+            <span className="text-cyan-300 font-mono">{filteredMaterials.length} Resources Available</span>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {DISCIPLINES.map((disc) => {
+              const Icon = disc.icon;
+              const isSelected = selectedDiscipline === disc.code;
+              return (
+                <button
+                  key={disc.code}
+                  onClick={() => setSelectedDiscipline(disc.code)}
+                  className={`px-4 py-2.5 rounded-2xl border text-xs font-extrabold flex items-center gap-2 shrink-0 transition-all shadow-sm ${
+                    isSelected
+                      ? 'bg-[#1CA3DC] text-slate-950 border-cyan-400 shadow-cyan-500/20 scale-105'
+                      : 'bg-slate-900/90 text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-800'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isSelected ? 'text-slate-950' : 'text-cyan-400'}`} />
+                  <span>{disc.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================== */}
+        {/* RESOURCE TYPE FILTER TABS */}
+        {/* ========================================== */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-800/80">
+          {RESOURCE_TYPES.map((type) => {
+            const isSelected = selectedType === type;
+            return (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                  isSelected
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                {type}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ========================================== */}
+        {/* DOWNLOAD CARDS GRID */}
+        {/* ========================================== */}
+        {filteredMaterials.length === 0 ? (
+          <div className="bg-slate-900/60 border border-slate-800 p-12 rounded-3xl text-center space-y-3">
+            <FileText className="w-12 h-12 text-slate-600 mx-auto" />
+            <h3 className="text-lg font-bold text-white">No Notes Found</h3>
+            <p className="text-xs text-slate-400">Try resetting your search query or discipline filter.</p>
             <button
-              onClick={() => setIsProfileModalOpen(false)}
+              onClick={() => {
+                setSelectedDiscipline('ALL');
+                setSelectedType('All Material');
+                setSearchQuery('');
+              }}
+              className="px-4 py-2 rounded-xl bg-[#1CA3DC] text-slate-950 font-bold text-xs"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMaterials.map((item) => (
+              <div
+                key={item.id}
+                className="bg-slate-900/90 border border-slate-800 hover:border-cyan-500/60 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-6 transition-all duration-200 hover:-translate-y-1 group relative"
+              >
+                <div className="space-y-4">
+                  {/* Card Header Badges */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[11px] font-black">
+                      {item.discipline} • {item.subjectCode || 'GATE'}
+                    </span>
+
+                    {item.badge && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-extrabold flex items-center gap-1">
+                        <Flame className="w-3 h-3 text-amber-400" />
+                        <span>{item.badge}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Title & Description */}
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-white group-hover:text-cyan-300 transition-colors leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* Topics Preview Chips */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Key Topics Included:</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {item.previewTopics.slice(0, 3).map((topic, tIdx) => (
+                        <span key={tIdx} className="px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-[10px] text-slate-300">
+                          ✓ {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer Actions */}
+                <div className="pt-4 border-t border-slate-800/80 space-y-3">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <FileCheck className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{item.pageCount} Pages ({item.fileSize})</span>
+                    </span>
+
+                    <span className="flex items-center gap-1 text-amber-400">
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <span>{item.rating} ({item.downloadCount} DLs)</span>
+                    </span>
+                  </div>
+
+                  {/* Dual Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setPreviewResource(item)}
+                      className="py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Preview</span>
+                    </button>
+
+                    <DirectDownloadButton
+                      resourceId={item.id}
+                      filePath={item.filePath}
+                      title={item.title}
+                      label="Download"
+                      compact
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ========================================== */}
+      {/* 📖 IN-PAGE PREVIEW & READ MODAL */}
+      {/* ========================================== */}
+      {previewResource && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-xl w-full space-y-6 shadow-2xl animate-fade-rise relative">
+            <button
+              onClick={() => setPreviewResource(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-xl bg-slate-800/60"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="text-center space-y-3">
-              <div className="flex justify-center">
-                <Logo size="sm" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Student Profile Setup</h2>
-              <p className="text-xs text-slate-400">Set your name &amp; target GATE discipline to customize your preparation.</p>
+            <div className="space-y-3">
+              <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
+                {previewResource.discipline} • {previewResource.type}
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">{previewResource.title}</h2>
+              <p className="text-xs text-slate-300 leading-relaxed">{previewResource.description}</p>
             </div>
 
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Student Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Shreyash"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-slate-950 text-xs text-white px-4 py-3 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
-                />
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+              <div className="text-xs font-bold text-cyan-300">Complete Table of Contents:</div>
+              <ul className="space-y-1 text-xs text-slate-300">
+                {previewResource.previewTopics.map((topic, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>{topic}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="text-xs text-slate-400">
+                File format: <strong className="text-white font-mono">PDF ({previewResource.fileSize})</strong>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Target GATE Discipline</label>
-                <select
-                  value={editPaper}
-                  onChange={(e) => setEditPaper(e.target.value)}
-                  className="w-full bg-slate-950 text-xs text-white px-4 py-3 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
-                >
-                  {GATE_PAPERS.map((p) => (
-                    <option key={p.code} value={p.code}>
-                      {p.name} ({p.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Daily Hours Goal</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="1"
-                    max="14"
-                    value={editGoal}
-                    onChange={(e) => setEditGoal(Number(e.target.value))}
-                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Target GATE Score</label>
-                  <input
-                    type="number"
-                    step="10"
-                    min="300"
-                    max="1000"
-                    value={editTargetScore}
-                    onChange={(e) => setEditTargetScore(Number(e.target.value))}
-                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-2xl border border-slate-800 focus:outline-none focus:border-[#1CA3DC]"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-[#1CA3DC] to-blue-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
-              >
-                <Check className="w-4 h-4" />
-                <span>Save Profile Setup</span>
-              </button>
-            </form>
+              <DirectDownloadButton
+                resourceId={previewResource.id}
+                filePath={previewResource.filePath}
+                title={previewResource.title}
+                label="Direct Download PDF"
+              />
+            </div>
           </div>
         </div>
       )}
-
-      {/* Main Content Area */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Sleek Sub-Navigation Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-8 bg-slate-900/80 backdrop-blur-md p-2 rounded-2xl border border-slate-800 shadow-lg">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
-            <button
-              onClick={() => setCurrentScreen('dashboard')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                currentScreen === 'dashboard' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => setCurrentScreen('paper-select')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                currentScreen === 'paper-select' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              Paper ({selectedPaperCode})
-            </button>
-            <button
-              onClick={() => setCurrentScreen('subjects')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                currentScreen === 'subjects' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              Subjects
-            </button>
-            <button
-              onClick={startMockQuiz}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                currentScreen === 'mock-test' ? 'bg-[#1CA3DC] text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              Mock Test
-            </button>
-            <button
-              onClick={() => setCurrentScreen('analytics')}
-              className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
-                currentScreen === 'analytics' ? 'bg-purple-600 text-white shadow-md' : 'text-purple-300 hover:bg-slate-800'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Analytics</span>
-            </button>
-          </div>
-
-          <button
-            onClick={openProfileModal}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 text-xs font-bold text-slate-200 transition-all shadow-sm"
-          >
-            <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-purple-600 to-[#1CA3DC] text-white font-black text-[10px] flex items-center justify-center">
-              {studentName.charAt(0).toUpperCase()}
-            </div>
-            <span className="font-semibold">{studentName}</span>
-            <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">
-              {selectedPaperCode}
-            </span>
-          </button>
-        </div>
-
-        {/* STEP 1 — 📊 DASHBOARD PAGE */}
-        {currentScreen === 'dashboard' && (
-          <div className="space-y-8 animate-fade-rise">
-            {/* Top Welcome Banner & Days-Left Countdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl space-y-6">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>GATE 2027 Preparation Portal</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-                    Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{studentName}</span>!
-                  </h1>
-                  <p className="text-slate-300 text-xs sm:text-sm">
-                    Active Discipline: <strong className="text-cyan-300 font-mono">{selectedPaperObj.name} ({selectedPaperCode})</strong>
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    onClick={() => setCurrentScreen('subjects')}
-                    className="px-4 py-2.5 rounded-xl bg-[#1CA3DC] hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all"
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    <span>Browse {selectedPaperCode} Subjects</span>
-                  </button>
-
-                  <button
-                    onClick={startMockQuiz}
-                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all"
-                  >
-                    <Trophy className="w-4 h-4 text-amber-300" />
-                    <span>Take GATE Mock Test</span>
-                  </button>
-
-                  <button
-                    onClick={() => setCurrentScreen('analytics')}
-                    className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-purple-300 text-xs font-bold flex items-center gap-1.5"
-                  >
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>Analytics &amp; Rank Predictor</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/90 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl flex flex-col justify-between space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Exam Target</div>
-                    <div className="text-sm font-bold text-white">Feb 6, 2027</div>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-sm font-black flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-amber-400" />
-                    <span>{daysLeft} Days</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                  <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-                    <svg className="w-14 h-14 transform -rotate-90">
-                      <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-slate-800" fill="transparent" />
-                      <circle
-                        cx="28"
-                        cy="28"
-                        r="22"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        strokeDasharray={138}
-                        strokeDashoffset={138 - (138 * overallPercentage) / 100}
-                        strokeLinecap="round"
-                        className="text-cyan-400 transition-all duration-1000"
-                        fill="transparent"
-                      />
-                    </svg>
-                    <span className="absolute text-xs font-black text-cyan-300 font-mono">{overallPercentage}%</span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-white">Overall Syllabus Progress</div>
-                    <div className="text-[11px] text-slate-400">
-                      {totalTopicsCompleted} of {totalTopicsInPaper} topics completed
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Weekly Study Streak & Daily Goal Setting */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-                    <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
-                    <span>Weekly Study Streak</span>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/40">
-                    3 Days Active
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-7 gap-2 text-center">
-                  {[
-                    { day: 'M', active: true },
-                    { day: 'T', active: true },
-                    { day: 'W', active: true },
-                    { day: 'T', active: false },
-                    { day: 'F', active: false },
-                    { day: 'S', active: false },
-                    { day: 'S', active: false },
-                  ].map((d, i) => (
-                    <div key={i} className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 ${d.active ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-600'}`}>
-                      <Flame className={`w-4 h-4 ${d.active ? 'text-amber-400' : 'text-slate-700'}`} />
-                      <span className="text-[10px] font-bold">{d.day}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Daily Target Goal Card */}
-              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <Target className="w-4 h-4 text-cyan-400" />
-                    <span>Daily Goal Target</span>
-                  </div>
-                  <span className="text-xs font-bold font-mono text-cyan-300">{(studyMinutesToday / 60).toFixed(1)} / {dailyGoalHours} hrs</span>
-                </div>
-
-                <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.round(((studyMinutesToday / 60) / dailyGoalHours) * 100))}%` }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                  <span>Adjust daily goal:</span>
-                  <select
-                    value={dailyGoalHours}
-                    onChange={(e) => setDailyGoalHours(Number(e.target.value))}
-                    className="bg-slate-950 border border-slate-800 text-cyan-300 rounded-lg px-2 py-0.5 text-xs"
-                  >
-                    <option value={2}>2 hrs / day</option>
-                    <option value={4}>4 hrs / day</option>
-                    <option value={6}>6 hrs / day</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Notification Reminders Card */}
-              <div className="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <Bell className="w-4 h-4 text-purple-400" />
-                    <span>Study Reminders</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold">
-                    {notifPermission === 'granted' ? 'Enabled' : 'Prompt'}
-                  </span>
-                </div>
-
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Receive browser nudges if you miss a daily study streak or neglect a weak subject.
-                </p>
-
-                {notifPermission !== 'granted' && (
-                  <button
-                    onClick={requestNotificationPermission}
-                    className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <span>Enable Reminders</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2 — 📄 PAPER SELECTION PAGE */}
-        {currentScreen === 'paper-select' && (
-          <div className="space-y-8 animate-fade-rise">
-            <div className="text-center max-w-2xl mx-auto space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Instant Access • No Login Required</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-                Hi, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1CA3DC] to-purple-400">{studentName}</span>! Choose your GATE Paper
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Select your engineering discipline to load syllabus weightage and 3D study modules.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {GATE_PAPERS.map((paper) => {
-                const Icon = paper.icon;
-                const isSelected = selectedPaperCode === paper.code;
-
-                return (
-                  <Tilt3DCard key={paper.code} onClick={() => handleSelectPaper(paper.code)} maxTilt={15}>
-                    <div
-                      className={`p-6 sm:p-7 rounded-3xl border backdrop-blur-xl shadow-xl transition-all h-full flex flex-col justify-between space-y-6 group ${
-                        isSelected
-                          ? 'border-cyan-400 bg-cyan-950/30 ring-2 ring-cyan-500/50'
-                          : themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700' : 'bg-white/90 border-slate-200'
-                      }`}
-                    >
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="px-3 py-1 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] font-extrabold font-mono text-cyan-300">
-                            PAPER CODE: {paper.code}
-                          </span>
-                          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${paper.color} flex items-center justify-center text-white shadow-lg style-3d`}>
-                            <Icon className="w-6 h-6" />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-xl font-black tracking-tight">{paper.name}</h3>
-                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{paper.category}</div>
-                        </div>
-
-                        <p className="text-xs text-slate-400 leading-relaxed">{paper.desc}</p>
-                      </div>
-
-                      <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between">
-                        <span className="text-xs font-bold text-cyan-400 group-hover:underline flex items-center gap-1">
-                          <span>Select Discipline</span>
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                        {isSelected && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Tilt3DCard>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3 — 📚 SUBJECTS PAGE */}
-        {currentScreen === 'subjects' && (
-          <div className="space-y-8 animate-fade-rise">
-            <div className="flex items-center justify-between">
-              <nav className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <button onClick={() => setCurrentScreen('dashboard')} className="hover:text-cyan-400 transition-colors">
-                  Home
-                </button>
-                <span>&gt;</span>
-                <span className="text-cyan-400 font-mono">{selectedPaperCode} Paper</span>
-                <span>&gt;</span>
-                <span className="text-white">Subjects</span>
-              </nav>
-
-              <button
-                onClick={() => setCurrentScreen('paper-select')}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-300 flex items-center gap-1.5"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Change Paper</span>
-              </button>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold mb-1">
-                  <span>{selectedPaperObj.category}</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  {selectedPaperObj.name} ({selectedPaperCode}) Core Subjects
-                </h1>
-                <p className="text-xs text-slate-300">
-                  Select a subject below to view topic notes, GATE weightage breakdown, and topic checklists.
-                </p>
-              </div>
-
-              <div className="px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-center shrink-0">
-                <div className="text-2xl font-black text-cyan-400 font-mono">{currentSubjectsList.length}</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Core Subjects</div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentSubjectsList.map((subject) => {
-                const completedCount = subject.checklist.filter((item) => completedTopics[`${subject.id}_${item}`]).length;
-                const subPercent = Math.round((completedCount / subject.checklist.length) * 100);
-
-                return (
-                  <Tilt3DCard
-                    key={subject.id}
-                    onClick={() => {
-                      setSelectedSubject(subject);
-                      setCurrentScreen('subject-detail');
-                    }}
-                    maxTilt={12}
-                  >
-                    <div
-                      className={`p-6 rounded-3xl border backdrop-blur-xl shadow-xl transition-all h-full flex flex-col justify-between space-y-6 group ${
-                        themeMode === 'dark' ? 'bg-slate-900/80 border-slate-800 hover:border-cyan-500/60' : 'bg-white/90 border-slate-200'
-                      }`}
-                    >
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black font-mono">
-                            {subject.weightage}
-                          </span>
-
-                          <div className="relative w-10 h-10 flex items-center justify-center">
-                            <svg className="w-10 h-10 transform -rotate-90">
-                              <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3" className="text-slate-800" fill="transparent" />
-                              <circle
-                                cx="20"
-                                cy="20"
-                                r="16"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeDasharray={100}
-                                strokeDashoffset={100 - subPercent}
-                                strokeLinecap="round"
-                                className="text-cyan-400 transition-all duration-1000"
-                                fill="transparent"
-                              />
-                            </svg>
-                            <span className="absolute text-[10px] font-black text-cyan-300 font-mono">{subPercent}%</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg font-black tracking-tight text-white group-hover:text-cyan-300 transition-colors">
-                            {subject.name}
-                          </h3>
-                          <p className="text-xs text-slate-400 mt-1 leading-relaxed">{subject.desc}</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between">
-                        <span className="text-xs text-slate-400 font-semibold">{completedCount} / {subject.checklist.length} Done</span>
-                        <button className="px-3.5 py-2 rounded-xl bg-[#1CA3DC] group-hover:bg-cyan-400 text-slate-950 font-extrabold text-xs flex items-center gap-1 shadow-md active:scale-95 transition-all">
-                          <span>Start Studying</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </Tilt3DCard>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 4 — 📖 SUBJECT DETAILS & PERSONAL NOTES PAGE */}
-        {currentScreen === 'subject-detail' && selectedSubject && (
-          <div className="space-y-8 animate-fade-rise">
-            <div className="flex items-center justify-between">
-              <nav className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <button onClick={() => setCurrentScreen('dashboard')} className="hover:text-cyan-400 transition-colors">
-                  Home
-                </button>
-                <span>&gt;</span>
-                <button onClick={() => setCurrentScreen('subjects')} className="hover:text-cyan-400 font-mono transition-colors">
-                  {selectedPaperCode}
-                </button>
-                <span>&gt;</span>
-                <span className="text-white">{selectedSubject.name}</span>
-              </nav>
-
-              <button
-                onClick={() => setCurrentScreen('subjects')}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-300 flex items-center gap-1.5"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Back to Subjects</span>
-              </button>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs font-extrabold">
-                  {selectedSubject.weightage} GATE Weightage
-                </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">{selectedSubject.name}</h1>
-              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-3xl">{selectedSubject.desc}</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <CheckSquare className="w-5 h-5 text-emerald-400" />
-                  <span>Topic Progress &amp; Personal Notes</span>
-                </h3>
-
-                <div className="space-y-4">
-                  {selectedSubject.checklist.map((topic, idx) => {
-                    const topicKey = `${selectedSubject.id}_${topic}`;
-                    const isDone = !!completedTopics[topicKey];
-                    const isNoteActive = activeTopicNoteId === topicKey;
-                    const noteText = topicNotes[topicKey] || '';
-
-                    return (
-                      <div key={idx} className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
-                        <div className="flex items-center justify-between">
-                          <div
-                            onClick={() => toggleTopicCompletion(selectedSubject.id, topic)}
-                            className="flex items-center gap-3 cursor-pointer group"
-                          >
-                            {isDone ? (
-                              <CheckSquare className="w-5 h-5 text-emerald-400 shrink-0" />
-                            ) : (
-                              <Square className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 shrink-0" />
-                            )}
-                            <span className={`text-sm font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'}`}>{topic}</span>
-                          </div>
-
-                          <button
-                            onClick={() => setActiveTopicNoteId(isNoteActive ? null : topicKey)}
-                            className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
-                              isNoteActive ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-950 text-slate-400 border-slate-800'
-                            }`}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>{noteText ? 'Edit Notes' : 'Add Note'}</span>
-                          </button>
-                        </div>
-
-                        {isNoteActive && (
-                          <div className="pt-3 border-t border-slate-800 space-y-3">
-                            <textarea
-                              rows={3}
-                              placeholder="Write key formulas, important concepts, or solved PYQ notes..."
-                              value={noteText}
-                              onChange={(e) => setTopicNotes({ ...topicNotes, [topicKey]: e.target.value })}
-                              className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-xs text-white focus:outline-none focus:border-cyan-500"
-                            />
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] text-slate-500 font-medium">Saved to Browser Storage</span>
-                              <button
-                                onClick={() => handleSaveTopicNote(topicKey, noteText)}
-                                disabled={savingNote}
-                                className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md"
-                              >
-                                {savingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                                <span>Save Note</span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-cyan-400" />
-                  <span>Syllabus &amp; Lectures</span>
-                </h3>
-
-                <div className="space-y-4">
-                  <a
-                    href="https://gate2026.iitg.ac.in/doc/GATE2026_Syllabus/CE_2026_Syllabus.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/60 transition-all flex items-start gap-4 group"
-                  >
-                    <div className="p-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/30 shrink-0">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">Official Syllabus PDF</h4>
-                      <p className="text-xs text-slate-400">Complete topic breakdown from IIT Madras.</p>
-                    </div>
-                  </a>
-
-                  <a
-                    href="https://gate.nptel.ac.in/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/60 transition-all flex items-start gap-4 group"
-                  >
-                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-                      <Video className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">NPTEL GATE Videos</h4>
-                      <p className="text-xs text-slate-400">Free video lectures &amp; PYQ solutions.</p>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 5 — 📈 ANALYTICS & INSIGHTS PAGE */}
-        {currentScreen === 'analytics' && (
-          <div className="space-y-8 animate-fade-rise">
-            {/* Navigation Header */}
-            <div className="flex items-center justify-between">
-              <nav className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <button onClick={() => setCurrentScreen('dashboard')} className="hover:text-cyan-400">
-                  Home
-                </button>
-                <span>&gt;</span>
-                <span className="text-white">Analytics &amp; Smart Insights</span>
-              </nav>
-
-              <button
-                onClick={() => setCurrentScreen('dashboard')}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300"
-              >
-                Back to Dashboard
-              </button>
-            </div>
-
-            {/* Hero Stat & Rank Predictor Header */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-purple-950 p-6 sm:p-8 rounded-3xl border border-purple-500/30 shadow-2xl space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-xs font-bold">
-                    <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>GATE Rank Predictor &amp; Analytics Engine</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-white">Smart Preparation Insights</h1>
-                </div>
-
-                <div className="flex items-center gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                  <div>
-                    <div className="text-[10px] font-bold uppercase text-slate-400">Predicted Score</div>
-                    <div className="text-2xl font-black text-cyan-400 font-mono">{predictedGateScore} / 1000</div>
-                  </div>
-                  <div className="pl-4 border-l border-slate-800">
-                    <div className="text-[10px] font-bold uppercase text-slate-400">Est. GATE Marks</div>
-                    <div className="text-2xl font-black text-purple-300 font-mono">{predictedGateMarks} / 100</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Target College Tier Benchmark */}
-              <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-300">Target College Admission Tier</span>
-                  <span className="text-cyan-300">Goal: {targetGateScore} Score</span>
-                </div>
-
-                <div className="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-emerald-400 transition-all duration-700"
-                    style={{ width: `${Math.min(100, Math.round((predictedGateScore / targetGateScore) * 100))}%` }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                  <span>Current Prediction: <strong className="text-cyan-300">{predictedGateScore >= 650 ? 'Top IITs (Bombay, Delhi, Madras)' : predictedGateScore >= 500 ? 'Old NITs & Mid IITs' : 'Newer NITs & State Tech Univ'}</strong></span>
-                  <span>{Math.round((predictedGateScore / targetGateScore) * 100)}% of Target Goal</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 🎯 WEAK SUBJECT DETECTION & REVISION ORDER */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Weak Subjects Card */}
-              <div className="bg-slate-900/90 p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                    <span>Weak Subject Ranking (High Yield)</span>
-                  </h3>
-                  <span className="text-xs text-slate-400">Low Accuracy × Weightage</span>
-                </div>
-
-                <div className="space-y-3">
-                  {weakSubjectsList.map((sub, idx) => (
-                    <div key={sub.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-slate-900 font-mono font-bold text-xs flex items-center justify-center text-slate-400">
-                          #{idx + 1}
-                        </span>
-                        <div>
-                          <div className="text-xs font-bold text-white">{sub.name}</div>
-                          <div className="text-[10px] text-slate-400">{sub.weightage} GATE Weightage</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          sub.status === 'Weak' ? 'bg-red-500/20 text-red-300 border border-red-500/40' : sub.status === 'Average' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                        }`}>
-                          {sub.status} ({sub.subAcc}%)
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recommended Revision Roadmap */}
-              <div className="bg-slate-900/90 p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-4 shadow-xl flex flex-col justify-between">
-                <div className="space-y-4">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-purple-400" />
-                    <span>Smart Revision Strategy</span>
-                  </h3>
-
-                  <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/30 space-y-2">
-                    <div className="text-xs font-bold text-purple-300">Priority 1 Focus:</div>
-                    <p className="text-xs text-slate-300 leading-relaxed">
-                      Spend 60% of daily study hours on <strong>{weakSubjectsList[0]?.name}</strong> ({weakSubjectsList[0]?.weightage} weightage). Resolving 50 PYQs in this area will yield up to +12 marks.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 space-y-2">
-                    <div className="text-xs font-bold text-cyan-300">Priority 2 Focus:</div>
-                    <p className="text-xs text-slate-300 leading-relaxed">
-                      Maintain mock test practice for <strong>{weakSubjectsList[1]?.name || 'Engineering Mathematics'}</strong>.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedSubject(weakSubjectsList[0]);
-                    setCurrentScreen('subject-detail');
-                  }}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
-                >
-                  <span>Revise {weakSubjectsList[0]?.name} Now</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* 30-DAY STUDY HEATMAP & TIME SPLIT */}
-            <div className="bg-slate-900/90 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 shadow-xl">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-cyan-400" />
-                  <span>30-Day Activity Heatmap</span>
-                </h3>
-                <span className="text-xs text-slate-400 font-mono">Today: {studyMinutesToday} mins</span>
-              </div>
-
-              {/* GitHub-style Heatmap Grid */}
-              <div className="grid grid-cols-10 sm:grid-cols-15 gap-2 pt-2">
-                {Array.from({ length: 30 }).map((_, idx) => {
-                  const intensity = idx % 5;
-                  let bg = 'bg-slate-950 border-slate-800';
-                  if (intensity === 1) bg = 'bg-cyan-950 border-cyan-800';
-                  if (intensity === 2) bg = 'bg-cyan-800 border-cyan-600';
-                  if (intensity === 3) bg = 'bg-cyan-600 border-cyan-400';
-                  if (intensity === 4) bg = 'bg-[#1CA3DC] border-white text-slate-950';
-
-                  return (
-                    <div
-                      key={idx}
-                      className={`h-8 sm:h-9 rounded-lg border flex items-center justify-center text-[10px] font-mono font-bold transition-transform hover:scale-110 ${bg}`}
-                    >
-                      {idx + 1}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 6 — 📝 MOCK TEST SIMULATOR */}
-        {currentScreen === 'mock-test' && quizQuestions[currentQuestionIndex] && (
-          <div className="max-w-4xl mx-auto space-y-8 animate-fade-rise">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 p-5 rounded-3xl border border-slate-800 shadow-xl">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">GATE Test Simulator</div>
-                <h2 className="text-lg font-black text-white">{selectedPaperCode} Paper Practice Exam</h2>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="px-4 py-2 rounded-2xl bg-slate-950 border border-slate-800 text-amber-300 font-mono text-sm font-black flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  <span>
-                    {Math.floor(quizTimer / 60)}:{(quizTimer % 60).toString().padStart(2, '0')}
-                  </span>
-                </div>
-
-                <button onClick={handleFinishQuiz} className="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg">
-                  Submit Exam
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-6 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <span className="px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
-                      Question {currentQuestionIndex + 1} of {quizQuestions.length}
-                    </span>
-                    <span className="text-xs text-slate-400 font-semibold">
-                      Marks: <strong className="text-white">{quizQuestions[currentQuestionIndex].marks}</strong> | Neg:{' '}
-                      <strong className="text-red-400">-{quizQuestions[currentQuestionIndex].negative_marks}</strong>
-                    </span>
-                  </div>
-
-                  <p className="text-base font-bold text-white leading-relaxed">
-                    {quizQuestions[currentQuestionIndex].question}
-                  </p>
-
-                  <div className="space-y-3">
-                    {quizQuestions[currentQuestionIndex].options.map((opt, oIdx) => {
-                      const isSelected = userAnswers[currentQuestionIndex] === oIdx;
-                      return (
-                        <div
-                          key={oIdx}
-                          onClick={() => handleSelectQuizOption(oIdx)}
-                          className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
-                            isSelected ? 'bg-cyan-500/20 border-cyan-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-300'
-                          }`}
-                        >
-                          <span className="text-xs font-semibold">{opt}</span>
-                          {isSelected && <CheckCircle2 className="w-4 h-4 text-cyan-400" />}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-                    <button
-                      onClick={toggleMarkForReview}
-                      className={`px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
-                        markedForReview[currentQuestionIndex] ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-950 text-slate-400 border-slate-800'
-                      }`}
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>{markedForReview[currentQuestionIndex] ? 'Marked for Review' : 'Mark for Review'}</span>
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {currentQuestionIndex > 0 && (
-                        <button onClick={() => setCurrentQuestionIndex((prev) => prev - 1)} className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold">
-                          Previous
-                        </button>
-                      )}
-                      {currentQuestionIndex < quizQuestions.length - 1 && (
-                        <button onClick={() => setCurrentQuestionIndex((prev) => prev + 1)} className="px-4 py-2 rounded-xl bg-[#1CA3DC] text-slate-950 font-bold text-xs">
-                          Next Question
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Question Palette</h4>
-                  <div className="grid grid-cols-4 gap-2.5">
-                    {quizQuestions.map((_, idx) => {
-                      const isAns = userAnswers[idx] !== undefined;
-                      const isReview = markedForReview[idx];
-                      const isCurrent = idx === currentQuestionIndex;
-                      let btnColor = 'bg-slate-950 border-slate-800 text-slate-400';
-                      if (isAns) btnColor = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-bold';
-                      if (isReview) btnColor = 'bg-purple-500/20 border-purple-500/40 text-purple-300 font-bold';
-                      if (isCurrent) btnColor += ' ring-2 ring-cyan-400';
-                      return (
-                        <button key={idx} onClick={() => setCurrentQuestionIndex(idx)} className={`p-3 rounded-xl border text-xs font-mono transition-all ${btnColor}`}>
-                          {idx + 1}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 7 — 📈 TEST RESULTS SCREEN */}
-        {currentScreen === 'test-result' && testResult && (
-          <div className="max-w-3xl mx-auto space-y-8 animate-fade-rise">
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-6 sm:p-8 rounded-3xl border border-slate-700/80 shadow-2xl text-center space-y-6">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-600 via-[#1CA3DC] to-blue-600 flex items-center justify-center mx-auto text-white shadow-xl style-3d">
-                <Trophy className="w-8 h-8 text-amber-300" />
-              </div>
-
-              <div className="space-y-1">
-                <h1 className="text-3xl font-black text-white">GATE Mock Test Performance Summary</h1>
-                <p className="text-xs text-slate-300">Attempt saved to local preparation history.</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Final Score</div>
-                  <div className="text-3xl font-black text-cyan-400 font-mono mt-1">
-                    {testResult.score} <span className="text-xs text-slate-400 font-normal">/ {testResult.maxScore}</span>
-                  </div>
-                </div>
-
-                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Accuracy</div>
-                  <div className="text-3xl font-black text-emerald-400 font-mono mt-1">{testResult.accuracy}%</div>
-                </div>
-
-                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Correct / Wrong</div>
-                  <div className="text-xl font-black text-white font-mono mt-2">
-                    <span className="text-emerald-400">{testResult.correctCount}</span> / <span className="text-red-400">{testResult.wrongCount}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center gap-3 pt-4">
-                <button onClick={startMockQuiz} className="px-4 py-2.5 rounded-xl bg-[#1CA3DC] text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg">
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Retake Test</span>
-                </button>
-                <button onClick={() => setCurrentScreen('dashboard')} className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-bold text-xs">
-                  Back to Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <style jsx global>{`
-        .style-3d {
-          transform-style: preserve-3d;
-          backface-visibility: hidden;
-        }
-        @keyframes fadeRise {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .animate-fade-rise {
-          animation: fadeRise 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
     </div>
   );
 }
