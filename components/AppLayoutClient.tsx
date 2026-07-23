@@ -5,6 +5,7 @@ import Navbar from './layout/Navbar';
 import MobileBottomNav from './layout/MobileBottomNav';
 import Footer from './layout/Footer';
 import OnboardingModal from './onboarding/OnboardingModal';
+import { usePathname } from 'next/navigation';
 import { Category, Subject } from '@/lib/types';
 
 interface AppLayoutClientProps {
@@ -14,8 +15,11 @@ interface AppLayoutClientProps {
 }
 
 export default function AppLayoutClient({ children }: AppLayoutClientProps) {
+  const pathname = usePathname();
+  const isFullWidthPage = pathname === '/' || pathname === '/gate-ce';
+
   return (
-    <div className="min-h-screen bg-brand-bg text-slate-800 flex flex-col font-sans selection:bg-[#1CA3DC]/20 selection:text-[#0B2A63]">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-[#1CA3DC] selection:text-slate-950">
       {/* First Visit Onboarding Modal */}
       <OnboardingModal />
 
@@ -23,7 +27,7 @@ export default function AppLayoutClient({ children }: AppLayoutClientProps) {
       <Navbar />
 
       {/* Main Content Viewport */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 pb-20 md:pb-10">
+      <main className={`flex-1 w-full ${isFullWidthPage ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 pb-20 md:pb-10'}`}>
         {children}
       </main>
 
