@@ -1,6 +1,6 @@
 -- ========================================================
 -- GATE 3D PREP WEB APP - COMPLETE SUPABASE DATABASE SCHEMA
--- PROMPTS 1, 2 & 3 COMBINED
+-- PROMPTS 1, 2 & 3 COMBINED (IDEMPOTENT & SAFE FOR ALL PROJECTS)
 -- ========================================================
 
 -- 1. USER PROFILES TABLE
@@ -18,20 +18,23 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
 CREATE POLICY "Users can view own profile" ON public.user_profiles
     FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 CREATE POLICY "Users can insert own profile" ON public.user_profiles
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
 CREATE POLICY "Users can update own profile" ON public.user_profiles
     FOR UPDATE USING (auth.uid() = user_id);
 
 
--- 2. SUBJECTS TABLE
+-- 2. SUBJECTS TABLE (Ensures columns exist even if subjects table pre-existed)
 CREATE TABLE IF NOT EXISTS public.subjects (
     id TEXT PRIMARY KEY,
-    paper_code VARCHAR(10) NOT NULL,
+    paper_code VARCHAR(10) DEFAULT 'CE',
     subject_name TEXT NOT NULL,
     weightage TEXT NOT NULL,
     weightage_percent INT NOT NULL DEFAULT 10,
@@ -40,8 +43,17 @@ CREATE TABLE IF NOT EXISTS public.subjects (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Ensure missing columns are added if an older subjects table already existed
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS paper_code VARCHAR(10) DEFAULT 'CE';
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS subject_name TEXT DEFAULT 'Core Subject';
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS weightage TEXT DEFAULT '10%';
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS weightage_percent INT DEFAULT 10;
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS icon_name TEXT DEFAULT 'BookOpen';
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS description TEXT;
+
 ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read access to subjects" ON public.subjects;
 CREATE POLICY "Allow public read access to subjects" ON public.subjects
     FOR SELECT USING (true);
 
@@ -59,9 +71,11 @@ CREATE TABLE IF NOT EXISTS public.topics (
 
 ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own topics" ON public.topics;
 CREATE POLICY "Users can view own topics" ON public.topics
     FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert/update own topics" ON public.topics;
 CREATE POLICY "Users can insert/update own topics" ON public.topics
     FOR ALL USING (auth.uid() = user_id);
 
@@ -78,6 +92,7 @@ CREATE TABLE IF NOT EXISTS public.notes (
 
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own notes" ON public.notes;
 CREATE POLICY "Users can manage own notes" ON public.notes
     FOR ALL USING (auth.uid() = user_id);
 
@@ -97,6 +112,7 @@ CREATE TABLE IF NOT EXISTS public.questions (
 
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read access to questions" ON public.questions;
 CREATE POLICY "Allow public read access to questions" ON public.questions
     FOR SELECT USING (true);
 
@@ -115,11 +131,12 @@ CREATE TABLE IF NOT EXISTS public.test_attempts (
 
 ALTER TABLE public.test_attempts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own test attempts" ON public.test_attempts;
 CREATE POLICY "Users can manage own test attempts" ON public.test_attempts
     FOR ALL USING (auth.uid() = user_id);
 
 
--- 7. STUDY SESSIONS TABLE (PROMPT 3: Analytics Time Tracking)
+-- 7. STUDY SESSIONS TABLE
 CREATE TABLE IF NOT EXISTS public.study_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -131,11 +148,12 @@ CREATE TABLE IF NOT EXISTS public.study_sessions (
 
 ALTER TABLE public.study_sessions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own study sessions" ON public.study_sessions;
 CREATE POLICY "Users can manage own study sessions" ON public.study_sessions
     FOR ALL USING (auth.uid() = user_id);
 
 
--- 8. USER GOALS & REMINDERS TABLE (PROMPT 3: Daily Goals)
+-- 8. USER GOALS TABLE
 CREATE TABLE IF NOT EXISTS public.user_goals (
     user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     daily_hours_target NUMERIC(3,1) DEFAULT 4.0,
@@ -146,6 +164,7 @@ CREATE TABLE IF NOT EXISTS public.user_goals (
 
 ALTER TABLE public.user_goals ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own goals" ON public.user_goals;
 CREATE POLICY "Users can manage own goals" ON public.user_goals
     FOR ALL USING (auth.uid() = user_id);
 
@@ -161,7 +180,13 @@ VALUES
 ('ce-water', 'CE', 'Water Resources Engineering', '12–16%', 15, 'Zap', 'Fluid Mechanics, Hydraulics, Open Channel Flow, Hydrology & Irrigation.'),
 ('bt-biochem', 'BT', 'Biochemistry', '15–18%', 18, 'Dna', 'Structure of Biomolecules, Enzyme Kinetics & Metabolic Pathways.'),
 ('bt-bioprocess', 'BT', 'Bioprocess Engineering', '20–25%', 22, 'Cog', 'Mass & Energy Balances, Bioreactor Design, Sterilization & Downstream.')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+    paper_code = EXCLUDED.paper_code,
+    subject_name = EXCLUDED.subject_name,
+    weightage = EXCLUDED.weightage,
+    weightage_percent = EXCLUDED.weightage_percent,
+    icon_name = EXCLUDED.icon_name,
+    description = EXCLUDED.description;
 
 
 INSERT INTO public.questions (paper_code, subject, question, options, correct_answer, marks, negative_marks, explanation)
