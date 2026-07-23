@@ -31,7 +31,20 @@ CREATE POLICY "Users can update own profile" ON public.user_profiles
     FOR UPDATE USING (auth.uid() = user_id);
 
 
--- 2. SUBJECTS TABLE (Ensures columns exist even if subjects table pre-existed)
+-- 2. SUBJECTS TABLE (Fixes UUID vs TEXT id conflict if pre-existed)
+DO $$ 
+BEGIN 
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'subjects' 
+        AND column_name = 'id' 
+        AND data_type = 'uuid'
+    ) THEN
+        ALTER TABLE public.subjects ALTER COLUMN id TYPE TEXT USING id::text;
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS public.subjects (
     id TEXT PRIMARY KEY,
     paper_code VARCHAR(10) DEFAULT 'CE',
