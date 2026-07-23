@@ -31,21 +31,10 @@ CREATE POLICY "Users can update own profile" ON public.user_profiles
     FOR UPDATE USING (auth.uid() = user_id);
 
 
--- 2. SUBJECTS TABLE (Fixes UUID vs TEXT id conflict if pre-existed)
-DO $$ 
-BEGIN 
-    IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_schema = 'public' 
-        AND table_name = 'subjects' 
-        AND column_name = 'id' 
-        AND data_type = 'uuid'
-    ) THEN
-        ALTER TABLE public.subjects ALTER COLUMN id TYPE TEXT USING id::text;
-    END IF;
-END $$;
+-- 2. SUBJECTS TABLE (Drop CASCADE clears any old foreign key type conflicts)
+DROP TABLE IF EXISTS public.subjects CASCADE;
 
-CREATE TABLE IF NOT EXISTS public.subjects (
+CREATE TABLE public.subjects (
     id TEXT PRIMARY KEY,
     paper_code VARCHAR(10) DEFAULT 'CE',
     subject_name TEXT NOT NULL,
@@ -55,14 +44,6 @@ CREATE TABLE IF NOT EXISTS public.subjects (
     description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- Ensure missing columns are added if an older subjects table already existed
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS paper_code VARCHAR(10) DEFAULT 'CE';
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS subject_name TEXT DEFAULT 'Core Subject';
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS weightage TEXT DEFAULT '10%';
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS weightage_percent INT DEFAULT 10;
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS icon_name TEXT DEFAULT 'BookOpen';
-ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS description TEXT;
 
 ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
 
